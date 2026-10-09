@@ -12,6 +12,17 @@ models/
 data/
 *.wav
 
+# SSL Certificates & Secrets
+*.pem
+*.key
+*.crt
+
+# Test outputs and page slices
+test_output.pdf
+test_itr_slip.pdf
+test_itr_slip.png
+annex_page_*.png
+
 # OS / Editor metadata
 .DS_Store
 Thumbs.db

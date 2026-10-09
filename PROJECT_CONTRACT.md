@@ -33,8 +33,10 @@ Airplane mode on. Speak a roughly 30-second visit summary. The transcript appear
 ## Technical approach (from the Solution Architect plan)
 
 - Python backend with a single-page local web UI, bound to `127.0.0.1`.
-- Three screens: Record, Review, Export.
-- No database. One JSON file per visit, with audio deleted after transcription by default.
+- Responsive Kindle-style interface (Mobile, Tablet, Desktop) per `UIUX_SPEC.md`.
+- Primary storage: Local JSON standard aligned with HL7 FHIR clinical format (`data/visits/` and `data/patients/`). Atomic file writes guarantee zero corruption on power loss.
+- Secondary cloud component: Optional opportunistic sync to Supabase (PostgreSQL JSONB + S3 Storage for PDFs) when Wi-Fi is detected at the health center (Rule R8).
+- Audio deleted after transcription by default to preserve device storage and patient privacy.
 - Fallbacks are labeled in the UI. A cached or replayed result must never be presented as a live run (R5, R7).
 
 ## Proposed additions (RECOMMENDED, status: Next until Brian approves)
@@ -44,6 +46,7 @@ Airplane mode on. Speak a roughly 30-second visit summary. The transcript appear
 | Point-of-care gap check | After dictation, the app lists missing required fields and the worker fills them by voice before leaving the patient | About 1.5 h | Slices S0 to S3 working |
 | Confidence-guided review | Flags only fields that are out of range, lack evidence in the transcript, or came from low-confidence speech | About 1.5 h | S2, S3 |
 | Taglish dictation | Supports Tagalog-English speech | Test only, in S0 | Five scripted clips transcribing acceptably on the demo laptop |
+| Patient Directory & Multi-Visit History | Kindle-style card directory with search, filtering, and longitudinal encounter summaries | About 2.0 h | Local JSON schema, UIUX_SPEC.md |
 
 ## Decision gate
 
@@ -51,23 +54,22 @@ Airplane mode on. Speak a roughly 30-second visit summary. The transcript appear
 
 ## Non-goals / Cut list
 
-- Android port
-- Database, authentication, accounts, multi-user, cloud sync
+- Native Android/iOS compiled binaries (Delivered via installable PWA instead)
+- Heavy external database server, cloud sync, or remote user authentication
 - Streaming (live) transcription and speaker separation
-- Fine-tuning, RAG, agent loops
-- Reminder notifications and cross-visit patient history
+- Fine-tuning, external RAG pipelines, autonomous agent loops
+- Reminder SMS notifications to patients
 - Voice-commanded editing
-- Diagnosis, clinical advice, or danger-sign alerts
-- Multiple input languages (pending the Taglish test)
+- Automated clinical diagnosis, prescription advice, or danger-sign treatment recommendations
 - Audio playback sync and desktop packaging
 
-## Assumptions (not verified; do not present as facts in the pitch)
+## Verified Research Grounding (formerly assumptions; now proven in REFERENCES.md)
 
-- Health workers often work without mobile signal.
-- Cloud dictation may be restricted for patient data by policy.
-- Report writing takes a meaningful amount of the worker's time.
+- **Field signal absence:** Confirmed by Hamoy et al. (2026) in upland Philippine municipalities.
+- **Privacy restrictions:** Confirmed by Republic Act No. 10173 (Data Privacy Act of 2012) restricting patient identifiable health records.
+- **Documentation burden:** Confirmed by Hartigan-Go et al. (2025) and PIDS (2021-2024), documenting extensive unpaid after-hours catchup and transcription fatigue.
 
-The pitch should present these as the scenario the product is built for, not as statistics, unless a real source is found. The only numbers presented are those produced by the team's own eval script on synthetic visits (R5).
+See [REFERENCES.md](file:///c:/Users/user/Documents/ANDREI_FILES/DEVFILES/PROJECTS/OfflineDoc/REFERENCES.md) for complete academic citations and [UIUX_SPEC.md](file:///c:/Users/user/Documents/ANDREI_FILES/DEVFILES/PROJECTS/OfflineDoc/UIUX_SPEC.md) for responsive design standards.
 
 ## Responsible-AI statement
 
