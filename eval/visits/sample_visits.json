@@ -1,0 +1,142 @@
+[
+  {
+    "id": "synthetic_01_hypertension_fever",
+    "notes": "Elderly patient with hypertension and fever requiring urgent RHU referral",
+    "transcript": "Si Tatay Rodrigo, 62 taong gulang taga Sitio Maligaya. Ang BP niya kanina ay 150 over 95, may lagnat din na 38.5. Masakit daw ang batok at nahihilo simula pa kahapon. Binigyan ko muna ng Paracetamol 500mg at pinagpahinga. Sinabihan ko na magpunta sa RHU bukas ng umaga para patingnan sa doktor. Babalikan ko sa Biyernes para i-follow up ang BP niya.",
+    "gold_record": {
+      "patient_label": "Rodrigo",
+      "age_years": 62,
+      "location": "Sitio Maligaya",
+      "chief_complaint": "Neck pain, Dizziness, Fever",
+      "symptoms": ["Neck pain", "Dizziness", "Fever"],
+      "vitals": {
+        "bp": "150/95",
+        "temp_c": 38.5,
+        "pulse_bpm": null,
+        "resp_rate": null,
+        "weight_kg": null
+      },
+      "medications_given": ["Paracetamol"],
+      "advice_given": ["Rest and adequate hydration"],
+      "follow_up": [
+        { "task": "Home visit follow-up check", "due": "Biyernes" }
+      ],
+      "referral": {
+        "facility": "Rural Health Unit (RHU)",
+        "reason": "Evaluation for Neck pain, Dizziness, Fever",
+        "urgency": "urgent"
+      }
+    },
+    "expected_nulls": ["vitals.pulse_bpm", "vitals.resp_rate", "vitals.weight_kg", "sex"]
+  },
+  {
+    "id": "synthetic_02_pediatric_fever_cough",
+    "notes": "Pediatric patient with viral cough, no immediate referral indicated",
+    "transcript": "Pasyente ay si Joshua, 3 taong gulang taga Sitio Riverside. Mainit ang katawan, temp ay 38.2. May ubo at sipon simula nung Martes. Pinainom ng paracetamol drops at pinayuhan ang nanay na painumin ng maraming tubig. Babalikan sa Linggo para icheck ang ubo.",
+    "gold_record": {
+      "patient_label": "Joshua",
+      "age_years": 3,
+      "location": "Sitio Riverside",
+      "chief_complaint": "Cough, Fever",
+      "symptoms": ["Cough", "Fever"],
+      "vitals": {
+        "bp": null,
+        "temp_c": 38.2,
+        "pulse_bpm": null,
+        "resp_rate": null,
+        "weight_kg": null
+      },
+      "medications_given": ["Paracetamol"],
+      "advice_given": ["Rest and hydration"],
+      "follow_up": [
+        { "task": "Home visit follow-up check", "due": "Linggo" }
+      ],
+      "referral": null
+    },
+    "expected_nulls": ["vitals.bp", "vitals.pulse_bpm", "vitals.resp_rate", "vitals.weight_kg", "referral"]
+  },
+  {
+    "id": "synthetic_03_prenatal_routine",
+    "notes": "Pregnant mother routine check, normal BP, referral to RHU for regular prenatal",
+    "transcript": "Si Nanay Elena, 28 taong gulang taga Sitio Ilaya. Buntis ng pitong buwan, normal ang BP na 110 over 70. Walang lagnat. Binigyan ng ferrous sulfate at folic acid. Sinabihan na pumunta sa RHU sa Lunes para sa regular na prenatal checkup ni Doktora.",
+    "gold_record": {
+      "patient_label": "Elena",
+      "age_years": 28,
+      "location": "Sitio Ilaya",
+      "chief_complaint": null,
+      "symptoms": [],
+      "vitals": {
+        "bp": "110/70",
+        "temp_c": null,
+        "pulse_bpm": null,
+        "resp_rate": null,
+        "weight_kg": null
+      },
+      "medications_given": ["Ferrous sulfate"],
+      "advice_given": ["Prenatal vitamins and nutrition"],
+      "follow_up": [
+        { "task": "Prenatal visit", "due": "Lunes" }
+      ],
+      "referral": {
+        "facility": "Rural Health Unit (RHU)",
+        "reason": "Prenatal checkup",
+        "urgency": "routine"
+      }
+    },
+    "expected_nulls": ["vitals.pulse_bpm", "vitals.resp_rate", "vitals.weight_kg"]
+  },
+  {
+    "id": "synthetic_04_diabetic_foot_wound",
+    "notes": "Diabetic elderly with chronic wound, urgent referral to RHU doctor",
+    "transcript": "Si Mang Tomas, 58 taong gulang taga Purok 2. May sugat sa kanang paa na hindi gumagaling dahil may diabetes. BP niya ay 140 over 90. Nilinis ko ang sugat gamit ang betadine at sterile gauze. Kailangan pumunta sa RHU agad ngayon din para maresitahan ng antibiotic ng doktor.",
+    "gold_record": {
+      "patient_label": "Tomas",
+      "age_years": 58,
+      "location": "Purok 2",
+      "chief_complaint": "Foot wound",
+      "symptoms": [],
+      "vitals": {
+        "bp": "140/90",
+        "temp_c": null,
+        "pulse_bpm": null,
+        "resp_rate": null,
+        "weight_kg": null
+      },
+      "medications_given": [],
+      "advice_given": ["Wound care and elevation"],
+      "follow_up": [],
+      "referral": {
+        "facility": "Rural Health Unit (RHU)",
+        "reason": "Evaluation for wound care",
+        "urgency": "urgent"
+      }
+    },
+    "expected_nulls": ["vitals.temp_c", "vitals.pulse_bpm", "vitals.resp_rate", "vitals.weight_kg"]
+  },
+  {
+    "id": "synthetic_05_geriatric_arthritis",
+    "notes": "Elderly patient with joint aches, routine guidance, no referral needed",
+    "transcript": "Si Aling Rosa, 71 taong gulang taga Sitio Maligaya. Sumasakit ang tuhod at kasukasuan kapag malamig. BP ay 120 over 80, walang lagnat. Pinayuhan na mag-warm compress at huwag magbuhat ng mabibigat. Walang gamot na binigay. Babalikan ko sa Huwebes para kumustahin.",
+    "gold_record": {
+      "patient_label": "Rosa",
+      "age_years": 71,
+      "location": "Sitio Maligaya",
+      "chief_complaint": "Joint pain",
+      "symptoms": [],
+      "vitals": {
+        "bp": "120/80",
+        "temp_c": null,
+        "pulse_bpm": null,
+        "resp_rate": null,
+        "weight_kg": null
+      },
+      "medications_given": [],
+      "advice_given": ["Warm compress and rest"],
+      "follow_up": [
+        { "task": "Home visit follow-up check", "due": "Huwebes" }
+      ],
+      "referral": null
+    },
+    "expected_nulls": ["vitals.temp_c", "vitals.pulse_bpm", "vitals.resp_rate", "vitals.weight_kg", "referral"]
+  }
+]

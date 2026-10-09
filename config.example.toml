@@ -1,0 +1,16 @@
+# OfflineDoc Configuration File
+[server]
+host = "127.0.0.1"
+port = 8000
+
+[models]
+whisper_bin = "bin/whisper-cli.exe"
+whisper_model = "models/ggml-base.bin"
+whisper_initial_prompt = "Magandang araw. Pasyente, barangay, sitio, lagnat, ubo, sipon, masakit ang ulo, BP, blood pressure, reseta, gamot, paracetamol, amoxicillin, follow-up, referral sa health center, RHU."
+llama_server_url = "http://127.0.0.1:8081"
+llama_model = "models/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
+
+[storage]
+data_dir = "data/visits"
+exports_dir = "data/exports"
+keep_audio = false

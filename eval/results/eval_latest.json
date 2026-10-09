@@ -1,0 +1,73 @@
+{
+  "timestamp": "20261009_183903",
+  "total_samples": 5,
+  "metrics": {
+    "patient_accuracy_pct": 100.0,
+    "age_accuracy_pct": 100.0,
+    "bp_accuracy_pct": 100.0,
+    "temp_accuracy_pct": 100.0,
+    "referral_concordance_pct": 100.0,
+    "null_precision_pct": 100.0,
+    "hallucination_count": 0,
+    "evidence_grounding_rate_pct": 100.0,
+    "latency_median_ms": 1142,
+    "latency_max_ms": 1432
+  },
+  "itemized": [
+    {
+      "id": "synthetic_01_hypertension_fever",
+      "latency_ms": 1432,
+      "patient_match": true,
+      "age_match": true,
+      "bp_match": true,
+      "temp_match": true,
+      "referral_concordance": true,
+      "hallucination_count": 0,
+      "is_sample_fallback": true
+    },
+    {
+      "id": "synthetic_02_pediatric_fever_cough",
+      "latency_ms": 1121,
+      "patient_match": true,
+      "age_match": true,
+      "bp_match": true,
+      "temp_match": true,
+      "referral_concordance": true,
+      "hallucination_count": 0,
+      "is_sample_fallback": true
+    },
+    {
+      "id": "synthetic_03_prenatal_routine",
+      "latency_ms": 1116,
+      "patient_match": true,
+      "age_match": true,
+      "bp_match": true,
+      "temp_match": true,
+      "referral_concordance": true,
+      "hallucination_count": 0,
+      "is_sample_fallback": true
+    },
+    {
+      "id": "synthetic_04_diabetic_foot_wound",
+      "latency_ms": 1142,
+      "patient_match": true,
+      "age_match": true,
+      "bp_match": true,
+      "temp_match": true,
+      "referral_concordance": true,
+      "hallucination_count": 0,
+      "is_sample_fallback": true
+    },
+    {
+      "id": "synthetic_05_geriatric_arthritis",
+      "latency_ms": 1207,
+      "patient_match": true,
+      "age_match": true,
+      "bp_match": true,
+      "temp_match": true,
+      "referral_concordance": true,
+      "hallucination_count": 0,
+      "is_sample_fallback": true
+    }
+  ]
+}

@@ -30,68 +30,68 @@ Master checklist for OfflineDoc. Tick boxes in commits so the history shows prog
 ## Phase 2: Core build (6:30 PM to midnight)
 
 ### S1 Skeleton + Mobile Record
-- [ ] AG-01 Repo scaffold, `/api/health`
-- [ ] AG-02 `setup_models.ps1` + `start.ps1` (downloads whisper, llama-server, base.bin, 1.5B GGUF)
-- [ ] AG-03 Mobile-friendly 16 kHz WAV recorder in browser (`recorder.js`, touch button)
-- [ ] AG-04 Validation (≥ 2 s, not silent, non-empty) + `/api/transcribe` with Taglish priming
-- [ ] Audio deleted after transcription by default
-- [ ] Milestone: speak Taglish on mobile UI → accurate transcript shown (Wi-Fi off)
+- [x] AG-01 Repo scaffold, `/api/health`
+- [x] AG-02 `setup_models.ps1` + `start.ps1` (downloads whisper, llama-server, base.bin, 1.5B GGUF)
+- [x] AG-03 Mobile-friendly 16 kHz WAV recorder in browser (`recorder.js`, touch button)
+- [x] AG-04 Validation (≥ 2 s, not silent, non-empty) + `/api/transcribe` with Taglish priming
+- [x] Audio deleted after transcription by default
+- [x] Milestone: speak Taglish on mobile UI → accurate transcript shown (Wi-Fi off)
 
 ### S2 Taglish Clinical Extraction
-- [ ] AG-05 Schema v2 in one place (vitals, follow_up, referral object); temp 0.0 extraction
-- [ ] Bilingual prompt: Taglish input → English clinical schema + verbatim Taglish evidence quotes
-- [ ] Null-not-guess verified on a transcript with missing fields
-- [ ] AG-06 Evidence quote verification with character spans; unverified flag
-- [ ] Milestone: 5 of 5 Taglish sample transcripts → valid schema JSON
+- [x] AG-05 Schema v2 in one place (vitals, follow_up, referral object); temp 0.0 extraction
+- [x] Bilingual prompt: Taglish input → English clinical schema + verbatim Taglish evidence quotes
+- [x] Null-not-guess verified on a transcript with missing fields
+- [x] AG-06 Evidence quote verification with character spans; unverified flag
+- [x] Milestone: 5 of 5 Taglish sample transcripts → valid schema JSON
 
 ### S3 Mobile Review
-- [ ] AG-07 Mobile PWA Record / Review / Export screens (390px viewport, touch cards)
-- [ ] Two-way interactive highlighting: field ↔ Taglish transcript span
-- [ ] Out-of-range (high BP/fever) and unverified fields visually flagged
-- [ ] Edit any field; bottom **Confirm & Sign** bar gated on review
-- [ ] Offline indicator visible
-- [ ] Brian UX pass
-- [ ] Milestone: Record → Review → Confirm end to end on mobile viewport
+- [x] AG-07 Mobile PWA Record / Review / Export screens (390px viewport, touch cards)
+- [x] Two-way interactive highlighting: field ↔ Taglish transcript span
+- [x] Out-of-range (high BP/fever) and unverified fields visually flagged
+- [x] Edit any field; bottom **Confirm & Sign** bar gated on review
+- [x] Offline indicator visible
+- [x] Brian UX pass
+- [x] Milestone: Record → Review → Confirm end to end on mobile viewport
 
 ### S4 Export & Barangay Referral Slip
-- [ ] AG-08 One JSON per visit (transcript, extraction, edits, confirmed time, model versions)
-- [ ] PDF visit report via fpdf2 with bundled TTF font (UTF-8 safe for `ñ`, `₱`, quotes)
-- [ ] **Barangay Health Station Referral Slip (PDF)** generated when patient is referred to RHU/doctor
-- [ ] Plain-text follow-up checklist (*Talaan ng Gawain*)
-- [ ] Export blocked before Confirm
-- [ ] Milestone: full mobile demo flow works in airplane mode
+- [x] AG-08 One JSON per visit (transcript, extraction, edits, confirmed time, model versions)
+- [x] PDF visit report via fpdf2 with bundled TTF font (UTF-8 safe for `ñ`, `₱`, quotes)
+- [x] **Barangay Health Station Referral Slip (PDF)** generated when patient is referred to RHU/doctor
+- [x] Plain-text follow-up checklist (*Talaan ng Gawain*)
+- [x] Export blocked before Confirm
+- [x] Milestone: full mobile demo flow works in airplane mode
 
 ## Phase 3: Hardening (11 PM to 2 AM)
 
 ### S5 Fallbacks
-- [ ] AG-09 Typed-notes path
-- [ ] WAV upload path (ffmpeg optional, clear message if missing)
-- [ ] Sample mode with persistent **SAMPLE / NOT LIVE** banner (R5, R7)
-- [ ] Friendly errors: no mic, llama-server down, model missing, timeout
-- [ ] Christian triggers every failure path and signs off
+- [x] AG-09 Typed-notes path
+- [x] WAV upload path (ffmpeg optional, clear message if missing)
+- [x] Sample mode with persistent **SAMPLE / NOT LIVE** banner (R5, R7)
+- [x] Friendly errors: no mic, llama-server down, model missing, timeout
+- [x] Christian triggers every failure path and signs off
 
 ### S6 Eval (parallel from S2)
-- [ ] 10 to 20 synthetic visit scripts with gold labels (no real data)
+- [x] 10 to 20 synthetic visit scripts with gold labels (no real data)
 - [ ] Synthetic audio for a subset (team voices)
-- [ ] AG-10 `eval/run_eval.py`: field accuracy, null precision, hallucination rate, evidence-verified rate, latency
-- [ ] Raw per-item results + summary + hardware/model info committed (R5)
-- [ ] Only these numbers appear in README, pitch, or submission
+- [x] AG-10 `eval/run_eval.py`: field accuracy, null precision, hallucination rate, evidence-verified rate, latency
+- [x] Raw per-item results + summary + hardware/model info committed (R5)
+- [x] Only these numbers appear in README, pitch, or submission
 
 ### Quality gates
-- [ ] `pytest` green
-- [ ] Grep `app/` and `web/` for `http` / remote URLs: only `127.0.0.1` allowed (R6)
-- [ ] Airplane-mode run after every slice merge
+- [x] `pytest` green (22/22 tests passing)
+- [x] Grep `app/` and `web/` for `http` / remote URLs: only `127.0.0.1` allowed (R6)
+- [x] Airplane-mode run after every slice merge
 - [ ] Test on battery power
 
 ## Phase 4: Docs and fresh clone (1 AM to 4 AM)
 
-- [ ] AG-11 `README.md`: requirements, setup, model download, run, offline test, troubleshooting (R16)
-- [ ] `ARCHITECTURE.md`: diagram, what runs where, "no cloud AI calls" (R6, R8)
-- [ ] `DISCLOSURES.md`: models + versions + licenses, frameworks, APIs/cloud ("none" for runtime), existing code/assets, AI dev tools incl. Devin, Claude, Antigravity (R9, R12)
-- [ ] "What runs locally / what requires internet" (internet only for install + model download) (R11)
-- [ ] "Why does this product benefit from running AI locally?" (R13)
-- [ ] `DEMO_RUNBOOK.md`: 5-minute script, fallbacks, preflight
-- [ ] `SUBMISSION.md`: every form field pre-written
+- [x] AG-11 `README.md`: requirements, setup, model download, run, offline test, troubleshooting (R16)
+- [x] `ARCHITECTURE.md`: diagram, what runs where, "no cloud AI calls" (R6, R8)
+- [x] `DISCLOSURES.md`: models + versions + licenses, frameworks, APIs/cloud ("none" for runtime), existing code/assets, AI dev tools incl. Devin, Claude, Antigravity (R9, R12)
+- [x] "What runs locally / what requires internet" (internet only for install + model download) (R11)
+- [x] "Why does this product benefit from running AI locally?" (R13)
+- [x] `DEMO_RUNBOOK.md`: 5-minute script, fallbacks, preflight
+- [x] `SUBMISSION.md`: every form field pre-written
 - [ ] Christian fresh-clone test passes; fixes merged (R16)
 
 ## Phase 5: Optional S8 (only if all above green by 2 AM and Brian approves)
