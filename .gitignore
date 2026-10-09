@@ -33,6 +33,8 @@ Thumbs.db
 video_remotion/node_modules/
 video_remotion/out/
 video_remotion/ref_frames/
+video_remotion/ref_logo_animation/
+video_remotion/ref_updated_frames/
 *.mp4
 _archive/
 

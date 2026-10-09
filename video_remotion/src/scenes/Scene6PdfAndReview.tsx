@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
+import { useCurrentFrame, spring, useVideoConfig } from 'remotion';
 import { GridBackground } from '../components/GridBackground';
 import { Subtitles } from '../components/Subtitles';
 import { Badge } from '../components/Badge';
@@ -9,9 +9,8 @@ export const Scene6PdfAndReview: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleSpring = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const card1Spring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
-  const card2Spring = spring({ frame: frame - 18, fps, config: { damping: 14, stiffness: 100 } });
-  const card3Spring = spring({ frame: frame - 26, fps, config: { damping: 14, stiffness: 100 } });
+  const leftSpring = spring({ frame: frame - 6, fps, config: { damping: 14, stiffness: 100 } });
+  const rightSpring = spring({ frame: frame - 12, fps, config: { damping: 14, stiffness: 100 } });
 
   return (
     <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
@@ -21,264 +20,363 @@ export const Scene6PdfAndReview: React.FC = () => {
       <div
         style={{
           position: 'absolute',
-          top: 90,
-          left: 140,
+          top: 70,
+          left: 100,
+          right: 100,
           transform: `translateY(${(1 - titleSpring) * 20}px)`,
           opacity: titleSpring,
         }}
       >
-        <Badge label="THE HEALTH WORKER STAYS IN CONTROL" dotColor="#10b981" textColor="#64748b" />
+        <Badge label="WORKING FEATURE 03 • POINT-OF-CARE RED FLAGS & PDF EXPORT" dotColor="#2563eb" textColor="#2563eb" />
         <h1
           style={{
-            fontSize: 68,
+            fontSize: 58,
             fontWeight: 900,
-            margin: '14px 0 0 0',
+            margin: '12px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             letterSpacing: '-0.02em',
+            color: '#0f172a',
             lineHeight: 1.1,
           }}
         >
-          <span style={{ color: '#0f172a' }}>REVIEW. EDIT. </span>
-          <span style={{ color: '#2563eb' }}>CONFIRM.</span>
+          REVIEW, CONFIRM & GENERATE DOH ITR SLIPS.
         </h1>
         <p
           style={{
-            fontSize: 24,
-            color: '#64748b',
-            margin: '12px 0 0 0',
+            fontSize: 22,
+            color: '#475569',
+            margin: '8px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             fontWeight: 500,
           }}
         >
-          Health workers verify the note before generating exportable records.
+          Automatic danger sign red flag checker + instant single-page Department of Health encounter slips.
         </p>
       </div>
 
-      {/* Three Cards Layout */}
+      {/* Main Content: Safety Checker & DOH ITR PDF */}
       <div
         style={{
           position: 'absolute',
-          top: 310,
-          left: 140,
-          right: 140,
+          top: 220,
+          left: 100,
+          right: 100,
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1.1fr 1.1fr',
-          gap: 32,
+          gridTemplateColumns: '1.1fr 1.25fr',
+          gap: 36,
         }}
       >
-        {/* Card 1: Visit Note (Editable) */}
+        {/* Left Bento: Point-of-Care Clinical Safety Checker */}
         <div
           style={{
             backgroundColor: '#ffffff',
-            borderRadius: 28,
-            padding: 36,
-            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            borderRadius: 24,
             border: '1px solid #e2e8f0',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.06)',
+            padding: '36px 40px',
+            transform: `translateY(${(1 - leftSpring) * 24}px)`,
+            opacity: leftSpring,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            height: 420,
+            height: 670,
             boxSizing: 'border-box',
-            transform: `translateY(${(1 - card1Spring) * 30}px)`,
-            opacity: card1Spring,
           }}
         >
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0, fontFamily: 'Inter, sans-serif' }}>
-                VISIT NOTE
-              </h3>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', letterSpacing: '0.08em' }}>
-                CONFIRMED RECORD
-              </span>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: '#dc2626',
+                letterSpacing: '0.06em',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                textTransform: 'uppercase',
+              }}
+            >
+              POINT-OF-CARE CLINICAL SAFETY CHECKER
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                color: '#64748b',
+                marginTop: 4,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 500,
+              }}
+            >
+              Automatically detects hypertensive crises and pre-eclampsia risks.
             </div>
 
-            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {[
-                { label: 'CHIEF CONCERN', value: 'Headache' },
-                { label: 'SYMPTOMS', value: 'Started this morning' },
-                { label: 'VITALS • BP', value: '120/80' },
-              ].map((field, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 0',
-                    borderBottom: '1px solid #f1f5f9',
-                  }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#64748b' }}>{field.label}</span>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{field.value}</span>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 800,
-                      color: '#2563eb',
-                      backgroundColor: '#eff6ff',
-                      padding: '4px 10px',
-                      borderRadius: 6,
-                    }}
-                  >
-                    EDIT
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: '14px 20px',
-              backgroundColor: '#047857',
-              color: '#ffffff',
-              borderRadius: 14,
-              fontSize: 16,
-              fontWeight: 800,
-              textAlign: 'center',
-              letterSpacing: '0.04em',
-              fontFamily: 'Inter, sans-serif',
-              boxShadow: '0 8px 20px rgba(4, 120, 87, 0.25)',
-            }}
-          >
-            ✓ VISIT NOTE CONFIRMED
-          </div>
-        </div>
-
-        {/* Card 2: PDF Visit Report */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 28,
-            padding: 36,
-            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
-            border: '1px solid #e2e8f0',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            height: 420,
-            boxSizing: 'border-box',
-            transform: `translateY(${(1 - card2Spring) * 30}px)`,
-            opacity: card2Spring,
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span
+            {/* Red Alert Card */}
+            <div
+              style={{
+                marginTop: 24,
+                padding: '20px 24px',
+                backgroundColor: '#fff1f2',
+                borderRadius: 16,
+                border: '1px solid #fecdd3',
+              }}
+            >
+              <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 14,
                   fontWeight: 900,
-                  color: '#2563eb',
-                  backgroundColor: '#eff6ff',
-                  padding: '3px 6px',
-                  borderRadius: 4,
-                  border: '1px solid #bfdbfe',
+                  color: '#e11d48',
+                  fontFamily: 'Inter, sans-serif',
+                  letterSpacing: '0.04em',
                 }}
               >
-                PDF
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', letterSpacing: '0.08em' }}>
-                OFFLINEDOC VISIT REPORT
-              </span>
+                ALERT • DANGER SIGN: HYPERTENSIVE CRISIS (BP &gt;= 140/90)
+              </div>
+              <div style={{ marginTop: 8, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+                Patient: Teresa Ramos (54yo, Purok 4)
+              </div>
+              <div style={{ marginTop: 4, fontSize: 14, color: '#9f1239', fontWeight: 600 }}>
+                Blood Pressure: 150/95 mmHg with severe occipital headache.
+              </div>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#be123c',
+                  backgroundColor: '#ffe4e6',
+                  padding: '6px 12px',
+                  borderRadius: 8,
+                  display: 'inline-block',
+                }}
+              >
+                Protocol Triggered: Mandatory prompt RHU Physician Referral.
+              </div>
             </div>
 
-            <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '18px 0 20px 0' }}>
-              Patient visit summary
-            </h3>
-
-            {/* Document lines */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ height: 8, width: '95%', backgroundColor: '#cbd5e1', borderRadius: 4 }} />
-              <div style={{ height: 8, width: '90%', backgroundColor: '#e2e8f0', borderRadius: 4 }} />
-              <div style={{ height: 8, width: '70%', backgroundColor: '#e2e8f0', borderRadius: 4 }} />
+            {/* Green Normal Protocol Card */}
+            <div
+              style={{
+                marginTop: 18,
+                padding: '20px 24px',
+                backgroundColor: '#f0fdf4',
+                borderRadius: 16,
+                border: '1px solid #bbf7d0',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 900,
+                  color: '#15803d',
+                  fontFamily: 'Inter, sans-serif',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                VERIFIED • MATERNAL PROTOCOL: Maria Santos (28yo, Purok 2)
+              </div>
+              <div style={{ marginTop: 6, fontSize: 14, color: '#166534', fontWeight: 600 }}>
+                Trimester 3 prenatal vitals normal (120/80 mmHg). No proteinuric alert.
+              </div>
             </div>
           </div>
 
-          <div
-            style={{
-              padding: '12px 18px',
-              backgroundColor: '#ecfdf5',
-              color: '#065f46',
-              borderRadius: 14,
-              fontSize: 13,
-              fontWeight: 800,
-              textAlign: 'center',
-              letterSpacing: '0.04em',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            ✓ CONFIRMED BY HEALTH WORKER
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div
+              style={{
+                padding: '16px',
+                backgroundColor: '#2563eb',
+                borderRadius: 12,
+                color: '#ffffff',
+                textAlign: 'center',
+                fontSize: 16,
+                fontWeight: 800,
+                letterSpacing: '0.04em',
+                fontFamily: 'Inter, sans-serif',
+                boxShadow: '0 8px 20px rgba(37, 99, 235, 0.25)',
+              }}
+            >
+              CONFIRM & COMMIT TO LOCAL LEDGER
+            </div>
+
+            <div
+              style={{
+                padding: '14px 18px',
+                backgroundColor: '#f8fafc',
+                borderRadius: 12,
+                border: '1px solid #e2e8f0',
+                fontSize: 12,
+                color: '#475569',
+                fontFamily: 'Inter, monospace',
+              }}
+            >
+              <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>LOCAL JSON LEDGER ATOMIC COMMIT</div>
+              <div>• Encounter saved to data/visits/visit_1791578264.json</div>
+              <div>• Patient longitudinal timeline updated in data/patients/P-001.json</div>
+            </div>
           </div>
         </div>
 
-        {/* Card 3: Follow-Up Checklist */}
+        {/* Right Bento: Official DOH Individual Treatment Record (ITR) PDF */}
         <div
           style={{
             backgroundColor: '#ffffff',
-            borderRadius: 28,
-            padding: 36,
-            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            borderRadius: 24,
             border: '1px solid #e2e8f0',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.06)',
+            padding: '36px 40px',
+            transform: `translateY(${(1 - rightSpring) * 24}px)`,
+            opacity: rightSpring,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            height: 420,
+            height: 670,
             boxSizing: 'border-box',
-            transform: `translateY(${(1 - card3Spring) * 30}px)`,
-            opacity: card3Spring,
           }}
         >
           <div>
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              FOLLOW-UP CHECKLIST
-            </span>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: '#0284c7',
+                letterSpacing: '0.06em',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                textTransform: 'uppercase',
+              }}
+            >
+              OFFICIAL DOH INDIVIDUAL TREATMENT RECORD (ITR)
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                color: '#64748b',
+                marginTop: 4,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 500,
+              }}
+            >
+              Single-page printable PDF generated locally on device via fpdf2.
+            </div>
 
-            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {[
-                'Follow up in 3 days',
-                'Re-check BP (baseline 120/80)',
-                'Monitor headache recovery',
-              ].map((task, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: 6,
-                      backgroundColor: '#ecfdf5',
-                      border: '1px solid #a7f3d0',
-                      color: '#059669',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 14,
-                      fontWeight: 900,
-                    }}
-                  >
-                    ✓
-                  </div>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{task}</span>
+            {/* Document Vector Preview */}
+            <div
+              style={{
+                marginTop: 18,
+                backgroundColor: '#ffffff',
+                border: '1px solid #94a3b8',
+                borderRadius: 10,
+                boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                padding: '16px 20px',
+                height: 380,
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                fontSize: 10,
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              {/* Official DOH Header */}
+              <div style={{ textAlign: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: 8 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b' }}>REPUBLIC OF THE PHILIPPINES</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#0369a1' }}>DEPARTMENT OF HEALTH</div>
+                <div style={{ fontSize: 8, color: '#475569' }}>
+                  PRIMARY CARE SERVICES • RURAL HEALTH UNIT & BARANGAY HEALTH STATION
                 </div>
-              ))}
+                <div style={{ fontSize: 10, fontWeight: 800, color: '#0f172a', marginTop: 4 }}>
+                  INDIVIDUAL TREATMENT RECORD (ITR) — CLINICAL ENCOUNTER SLIP
+                </div>
+              </div>
+
+              {/* Patient Meta Grid */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: 6,
+                  backgroundColor: '#f8fafc',
+                  padding: '6px 10px',
+                  borderRadius: 6,
+                  fontSize: 9,
+                }}
+              >
+                <div><strong>Patient:</strong> Maria Santos</div>
+                <div><strong>Age / Sex:</strong> 28 yo / Female</div>
+                <div><strong>Purok / Sitio:</strong> Purok 2</div>
+                <div><strong>TCL Category:</strong> Maternal Care</div>
+                <div><strong>Encounter ID:</strong> ITR-2026-0042</div>
+                <div><strong>Date/Time:</strong> 2026-10-10 05:27:11</div>
+              </div>
+
+              {/* Section I: Metrics Table */}
+              <div>
+                <div style={{ fontSize: 9, fontWeight: 800, color: '#0284c7' }}>I. TARGET CLIENT LIST (TCL) CLINICAL METRICS & VITALS</div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.2fr 1fr 1fr 1fr',
+                    fontSize: 8.5,
+                    borderTop: '1px solid #e2e8f0',
+                    padding: '4px 0',
+                    marginTop: 4,
+                  }}
+                >
+                  <span style={{ color: '#64748b' }}>Blood Pressure (BP)</span>
+                  <span style={{ fontWeight: 700 }}>120/80 mmHg</span>
+                  <span style={{ color: '#64748b' }}>Standard: 90/60 to 120/80</span>
+                  <span style={{ color: '#16a34a', fontWeight: 800 }}>Normotensive</span>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.2fr 1fr 1fr 1fr',
+                    fontSize: 8.5,
+                    borderTop: '1px solid #f1f5f9',
+                    padding: '4px 0',
+                  }}
+                >
+                  <span style={{ color: '#64748b' }}>Gestational Age</span>
+                  <span style={{ fontWeight: 700 }}>32 weeks AOG</span>
+                  <span style={{ color: '#64748b' }}>Term: 37 to 40 weeks</span>
+                  <span style={{ color: '#2563eb', fontWeight: 800 }}>Trimester 3</span>
+                </div>
+              </div>
+
+              {/* Section II: Care Plan */}
+              <div style={{ backgroundColor: '#fefce8', padding: '6px 10px', borderRadius: 6, fontSize: 8.5 }}>
+                <div style={{ fontWeight: 800, color: '#a16207' }}>CARE PLAN & PRESCRIBED MEDICINES (GENERIC DISPENSATION):</div>
+                <div style={{ color: '#854d0e', marginTop: 2 }}>
+                  Ferrous sulfate 60mg OD (oral iron). Next RHU checkup scheduled in 2 weeks.
+                </div>
+              </div>
+
+              {/* Signatures */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: 6, fontSize: 8 }}>
+                <div>
+                  <div style={{ fontWeight: 700 }}>Maria Dela Cruz, BHW</div>
+                  <div style={{ color: '#64748b' }}>Barangay Health Worker (Accredited RA 7883)</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 700 }}>Doc Santos, MD</div>
+                  <div style={{ color: '#64748b' }}>Rural Health Physician (License # 089124)</div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div
             style={{
-              padding: '12px 18px',
-              backgroundColor: '#f1f5f9',
-              color: '#475569',
-              borderRadius: 14,
-              fontSize: 12,
-              fontWeight: 800,
+              padding: '16px',
+              backgroundColor: '#0284c7',
+              borderRadius: 12,
+              color: '#ffffff',
               textAlign: 'center',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
+              fontSize: 16,
+              fontWeight: 800,
+              letterSpacing: '0.04em',
               fontFamily: 'Inter, sans-serif',
+              boxShadow: '0 8px 20px rgba(2, 132, 199, 0.25)',
             }}
           >
-            READY FOR COMMUNITY WORKER
+            GENERATE OFFICIAL DOH ITR SLIP (PDF)
           </div>
         </div>
       </div>

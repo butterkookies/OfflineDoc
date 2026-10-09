@@ -9,11 +9,11 @@ export const Scene1Problem: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleSpring = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const stackSpring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
-  const clockSpring = spring({ frame: frame - 20, fps, config: { damping: 14, stiffness: 100 } });
+  const leftCardSpring = spring({ frame: frame - 4, fps, config: { damping: 14, stiffness: 100 } });
+  const rightCardSpring = spring({ frame: frame - 8, fps, config: { damping: 14, stiffness: 100 } });
 
-  const clockHandRotation = interpolate(frame, [0, 120], [45, 405]);
-  const formsProgress = interpolate(frame, [0, 80], [0, 50], { extrapolateRight: 'clamp' });
+  const clockRotation = interpolate(frame, [0, 120], [0, 360]);
+  const hoursCount = interpolate(frame, [10, 80], [0.0, 3.8], { extrapolateRight: 'clamp' });
 
   return (
     <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
@@ -23,293 +23,374 @@ export const Scene1Problem: React.FC = () => {
       <div
         style={{
           position: 'absolute',
-          top: 90,
-          left: 140,
+          top: 70,
+          left: 100,
+          right: 100,
           transform: `translateY(${(1 - titleSpring) * 20}px)`,
           opacity: titleSpring,
         }}
       >
-        <Badge label="THE PAPERWORK PILE" dotColor="#10b981" textColor="#64748b" />
+        <Badge label="THE FRONTLINE REALITY • BARANGAY HEALTH WORKERS" dotColor="#2563eb" textColor="#2563eb" />
         <h1
           style={{
-            fontSize: 68,
+            fontSize: 58,
             fontWeight: 900,
-            margin: '14px 0 0 0',
+            margin: '12px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             letterSpacing: '-0.02em',
+            color: '#0f172a',
             lineHeight: 1.1,
           }}
         >
-          <span style={{ color: '#0f172a' }}>DOCUMENTING PAPERS </span>
-          <span style={{ color: '#2563eb' }}>TAKES TIME.</span>
+          DOCUMENTING EVERY VISIT TAKES TIME.
         </h1>
         <p
           style={{
-            fontSize: 24,
-            color: '#64748b',
-            margin: '12px 0 0 0',
+            fontSize: 22,
+            color: '#475569',
+            margin: '8px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             fontWeight: 500,
           }}
         >
-          For health workers, every visit means another record to write.
+          Under RA 7883, BHWs spend 3 to 4 hours every evening manually writing paper logs.
         </p>
       </div>
 
-      {/* Left Column: One page becomes a pile */}
+      {/* Main Content: Two Balanced Bento Cards */}
       <div
         style={{
           position: 'absolute',
-          top: 420,
-          left: 140,
-          width: 380,
-          opacity: titleSpring,
+          top: 220,
+          left: 100,
+          right: 100,
+          display: 'grid',
+          gridTemplateColumns: '1.25fr 1fr',
+          gap: 36,
         }}
       >
-        <h2
+        {/* Left Bento: Manual DOH Target Client List Logbooks */}
+        <div
           style={{
-            fontSize: 48,
-            fontWeight: 900,
-            color: '#0f172a',
-            margin: 0,
-            fontFamily: 'Inter, system-ui, sans-serif',
-            lineHeight: 1.15,
+            backgroundColor: '#ffffff',
+            borderRadius: 24,
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.06)',
+            padding: '36px 40px',
+            transform: `translateY(${(1 - leftCardSpring) * 24}px)`,
+            opacity: leftCardSpring,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: 670,
+            boxSizing: 'border-box',
           }}
         >
-          One page becomes a pile.
-        </h2>
-        <p
-          style={{
-            fontSize: 20,
-            color: '#2563eb',
-            margin: '16px 0 0 0',
-            fontWeight: 600,
-            lineHeight: 1.4,
-            fontFamily: 'Inter, system-ui, sans-serif',
-          }}
-        >
-          And every page asks for your attention.
-        </p>
+          <div>
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 800,
+                color: '#0284c7',
+                letterSpacing: '0.06em',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                textTransform: 'uppercase',
+              }}
+            >
+              MANUAL DOH TARGET CLIENT LIST (TCL) LOGBOOKS
+            </div>
+            <div
+              style={{
+                fontSize: 18,
+                color: '#64748b',
+                marginTop: 6,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 500,
+              }}
+            >
+              Community home visits yield piles of handwritten encounter sheets.
+            </div>
 
-        {/* Forms completed progress bar */}
-        <div style={{ marginTop: 48 }}>
+            {/* 3 Real Cohort Logs */}
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {[
+                {
+                  code: 'DOH FORM 01',
+                  title: 'FORM 01: MATERNAL CARE TCL LOG',
+                  details: 'Maria Santos • 28yo • Purok 2 • Prenatal Visit 3 • BP 120/80',
+                  delay: 0,
+                },
+                {
+                  code: 'DOH FORM 02',
+                  title: 'FORM 02: HYPERTENSION MONITORING LOG',
+                  details: 'Teresa Ramos • 54yo • Purok 4 • BP 150/95 • Headache noted',
+                  delay: 8,
+                },
+                {
+                  code: 'DOH FORM 03',
+                  title: 'FORM 03: CHILD IMMUNIZATION (EPI) REGISTER',
+                  details: 'Baby Joshua Bautista • 9mo • Purok 3 • Pentavalent 3 & Vit A',
+                  delay: 16,
+                },
+              ].map((item, idx) => {
+                const itemSpring = spring({
+                  frame: frame - item.delay,
+                  fps,
+                  config: { damping: 14, stiffness: 110 },
+                });
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '20px 24px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: 16,
+                      border: '1px solid #e2e8f0',
+                      transform: `translateY(${(1 - itemSpring) * 16}px)`,
+                      opacity: Math.max(0.3, itemSpring),
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                        <span
+                          style={{
+                            padding: '4px 10px',
+                            backgroundColor: '#e0f2fe',
+                            color: '#0369a1',
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 800,
+                            letterSpacing: '0.04em',
+                            fontFamily: 'Inter, system-ui, sans-serif',
+                          }}
+                        >
+                          {item.code}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 800,
+                            color: '#0f172a',
+                            fontFamily: 'Inter, system-ui, sans-serif',
+                          }}
+                        >
+                          {item.title}
+                        </span>
+                      </div>
+                      <span
+                        style={{
+                          padding: '4px 12px',
+                          backgroundColor: '#fef3c7',
+                          color: '#b45309',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 800,
+                          letterSpacing: '0.04em',
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}
+                      >
+                        MANUAL PENDING
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 10,
+                        fontSize: 15,
+                        color: '#475569',
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {item.details}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: 13,
-              fontWeight: 800,
-              color: '#64748b',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
+              padding: '16px 20px',
+              backgroundColor: '#eff6ff',
+              borderRadius: 12,
+              border: '1px solid #bfdbfe',
+              fontSize: 15,
+              fontWeight: 700,
+              color: '#1d4ed8',
               fontFamily: 'Inter, system-ui, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
             }}
           >
-            <span>FORMS COMPLETED</span>
-            <span>4 / 8</span>
+            <span>📋</span>
+            <span>Quadruple-entry burden: Same patient copied into Notebook, TCL, ITR, and Summary tables.</span>
           </div>
+        </div>
+
+        {/* Right Bento: Analog Clock & Time Lost Stats */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 24,
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.06)',
+            padding: '36px 40px',
+            transform: `translateY(${(1 - rightCardSpring) * 24}px)`,
+            opacity: rightCardSpring,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: 670,
+            boxSizing: 'border-box',
+          }}
+        >
+          {/* Analog Clock Dial */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+              style={{
+                width: 210,
+                height: 210,
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                border: '8px solid #f1f5f9',
+                boxShadow: '0 16px 36px rgba(15, 23, 42, 0.08)',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                <div
+                  key={deg}
+                  style={{
+                    position: 'absolute',
+                    width: 3,
+                    height: deg % 90 === 0 ? 12 : 7,
+                    backgroundColor: '#94a3b8',
+                    borderRadius: 2,
+                    transform: `rotate(${deg}deg) translateY(-88px)`,
+                  }}
+                />
+              ))}
+
+              {/* Clock center pin */}
+              <div
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  backgroundColor: '#2563eb',
+                  zIndex: 10,
+                  boxShadow: '0 0 8px rgba(37, 99, 235, 0.6)',
+                }}
+              />
+
+              {/* Blue Clock hand */}
+              <div
+                style={{
+                  position: 'absolute',
+                  width: 5,
+                  height: 70,
+                  backgroundColor: '#2563eb',
+                  borderRadius: 3,
+                  transformOrigin: 'bottom center',
+                  transform: `translateY(-35px) rotate(${clockRotation}deg)`,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                marginTop: 14,
+                fontSize: 13,
+                fontWeight: 800,
+                color: '#64748b',
+                letterSpacing: '0.1em',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                textTransform: 'uppercase',
+              }}
+            >
+              TIME KEEPS MOVING
+            </div>
+          </div>
+
+          {/* Red Lost Hours Card */}
           <div
             style={{
-              width: 340,
-              height: 10,
-              backgroundColor: '#e2e8f0',
-              borderRadius: 999,
-              marginTop: 10,
-              overflow: 'hidden',
+              width: '100%',
+              backgroundColor: '#fff1f2',
+              borderRadius: 18,
+              border: '1px solid #fecdd3',
+              padding: '24px 28px',
+              textAlign: 'center',
+              boxSizing: 'border-box',
             }}
           >
             <div
               style={{
-                width: `${formsProgress}%`,
-                height: '100%',
-                background: 'linear-gradient(to right, #2563eb, #10b981)',
-                borderRadius: 999,
+                fontSize: 44,
+                fontWeight: 900,
+                color: '#e11d48',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
               }}
-            />
+            >
+              {hoursCount.toFixed(1)} Hours / Evening
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                color: '#9f1239',
+                marginTop: 8,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 600,
+              }}
+            >
+              Wasted on manual transcription and paper double-documentation.
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Center: Stack of Paper Forms */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 300,
-          left: 720,
-          width: 500,
-          height: 520,
-          transform: `translateY(${(1 - stackSpring) * 30}px)`,
-          opacity: stackSpring,
-        }}
-      >
-        {[
-          { label: 'FORM 01 DOCUMENT DETAILS', top: 0, left: 0 },
-          { label: 'FORM 02 DOCUMENT DETAILS', top: 35, left: 15 },
-          { label: 'FORM 03 DOCUMENT DETAILS', top: 70, left: 30 },
-          { label: 'FORM 04 DOCUMENT DETAILS', top: 105, left: 45 },
-          { label: 'FORM 05 DOCUMENT DETAILS', top: 140, left: 60 },
-          { label: 'FORM 06 DOCUMENT DETAILS', top: 190, left: 80, isFront: true },
-        ].map((form, i) => (
+          {/* Blue Legal Context Card */}
           <div
-            key={i}
             style={{
-              position: 'absolute',
-              top: form.top,
-              left: form.left,
-              width: 440,
-              height: 260,
-              backgroundColor: '#ffffff',
-              borderRadius: 20,
-              border: '1px solid #cbd5e1',
-              boxShadow: '0 16px 36px rgba(15, 23, 42, 0.08)',
-              padding: 24,
-              display: 'flex',
-              flexDirection: 'column',
+              width: '100%',
+              backgroundColor: '#f0f9ff',
+              borderRadius: 16,
+              border: '1px solid #bae6fd',
+              padding: '18px 24px',
               boxSizing: 'border-box',
-              zIndex: i,
             }}
           >
             <div
               style={{
                 fontSize: 13,
                 fontWeight: 800,
-                color: form.isFront ? '#2563eb' : '#475569',
-                letterSpacing: '0.08em',
+                color: '#0284c7',
+                letterSpacing: '0.06em',
                 fontFamily: 'Inter, system-ui, sans-serif',
+                textTransform: 'uppercase',
               }}
             >
-              {form.label}
+              LEGAL CONTEXT (REPUBLIC ACT 7883):
             </div>
-            {/* Mock text lines */}
             <div
               style={{
-                marginTop: 30,
-                height: 8,
-                width: '80%',
-                backgroundColor: '#e2e8f0',
-                borderRadius: 4,
+                fontSize: 14,
+                color: '#0369a1',
+                marginTop: 4,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 500,
+                lineHeight: 1.4,
               }}
-            />
-            <div
-              style={{
-                marginTop: 14,
-                height: 8,
-                width: '65%',
-                backgroundColor: '#e2e8f0',
-                borderRadius: 4,
-              }}
-            />
-            <div
-              style={{
-                marginTop: 14,
-                height: 8,
-                width: '90%',
-                backgroundColor: '#e2e8f0',
-                borderRadius: 4,
-              }}
-            />
+            >
+              BHWs are frontline volunteers mandated to monitor community primary care across 42,000+ barangays.
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Right Column: Analog Clock */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 350,
-          right: 180,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          transform: `translateY(${(1 - clockSpring) * 20}px)`,
-          opacity: clockSpring,
-        }}
-      >
-        <div
-          style={{
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            backgroundColor: '#ffffff',
-            border: '8px solid #f1f5f9',
-            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.08)',
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {/* Clock hour markers */}
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
-            <div
-              key={deg}
-              style={{
-                position: 'absolute',
-                width: 2,
-                height: deg % 90 === 0 ? 10 : 6,
-                backgroundColor: '#94a3b8',
-                top: 10,
-                left: 101,
-                transformOrigin: 'bottom center',
-                transform: `rotate(${deg}deg) translateY(-85px)`,
-              }}
-            />
-          ))}
-
-          {/* Minute hand (blue) */}
-          <div
-            style={{
-              position: 'absolute',
-              width: 4,
-              height: 65,
-              backgroundColor: '#2563eb',
-              top: 45,
-              borderRadius: 3,
-              transformOrigin: 'bottom center',
-              transform: `rotate(${clockHandRotation}deg)`,
-            }}
-          />
-
-          {/* Hour hand (navy) */}
-          <div
-            style={{
-              position: 'absolute',
-              width: 5,
-              height: 45,
-              backgroundColor: '#0f172a',
-              top: 65,
-              borderRadius: 3,
-              transformOrigin: 'bottom center',
-              transform: `rotate(${clockHandRotation * 0.15 + 90}deg)`,
-            }}
-          />
-
-          {/* Center teal pivot */}
-          <div
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              zIndex: 10,
-              boxShadow: '0 0 6px rgba(16, 185, 129, 0.5)',
-            }}
-          />
         </div>
-
-        <span
-          style={{
-            marginTop: 24,
-            fontSize: 14,
-            fontWeight: 800,
-            color: '#64748b',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            fontFamily: 'Inter, system-ui, sans-serif',
-          }}
-        >
-          TIME KEEPS MOVING
-        </span>
       </div>
 
       <Subtitles text="For health workers, documenting every patient visit takes time." />
