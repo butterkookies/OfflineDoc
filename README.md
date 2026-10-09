@@ -112,7 +112,9 @@ py -3.12 -m venv .venv        # Windows; on Linux/macOS: python3.12 -m venv .ven
 # On Linux/macOS:
 source .venv/bin/activate
 
-pip install -r requirements.txt
+# Your prompt must now start with "(.venv)". If it doesn't, the venv is not active
+# and pip/python will not be found or will use the wrong Python.
+python -m pip install -r requirements.txt
 ```
 
 #### Step 2: Download Models & Local Inference Binaries (If not pre-bundled)
