@@ -62,6 +62,8 @@ def transcribe_audio(wav_path: Path, language: str = "tl") -> TranscriptionResul
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=60,
             check=True,
         )

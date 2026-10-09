@@ -71,9 +71,19 @@
   3. **Root Cause 1:** Language was set to `language="auto"`. When audio starts with words like "Test" or "Tested", Whisper locks into English (`en`), causing subsequent Tagalog phonemes to be forced into English phonetic approximations.
   4. **Root Cause 2:** Model capacity of `base` (~142MB) is limited for code-switching. Whisper `small` (~466MB) or explicit `-l tl` with strong prompt priming drastically stabilizes Tagalog syntax and word boundaries.
 
+### Phase 5: Speech-to-Text Accuracy & Encoding Optimization (Oct 9, ~7:20 PM PHT)
+- **Root Cause Discovered in Server Logs:**
+  1. `UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d`: Windows `subprocess.run(text=True)` defaulted to `cp1252` while `whisper-cli.exe` outputs UTF-8. Fixed by enforcing `encoding="utf-8", errors="replace"`.
+  2. Language wavering: `language="auto"` caused Whisper to detect `en` when starting with words like "Test", forcing Tagalog into English phonemes ("mata asang"). Fixed by forcing `-l tl` (Tagalog) by default.
+  3. Model capacity: Upgraded from `ggml-base.bin` (141 MB) to `ggml-small.bin` (466 MB) with 4-path beam search (`-bs 4`) and complete Taglish clinical context priming.
+- **Verification:** 22/22 pytest tests passing; live `llama-server` on port 8081 functioning in hybrid extraction mode.
+
 ---
 
-## 3. Active Decisions & Open Items
-- [ ] Enforce `--language tl` (Tagalog) by default in `app/transcribe.py` so Whisper uses Tagalog tokenizer vocabulary and handles Taglish loanwords without splitting words like "mataas ang".
-- [ ] Upgrade / test `ggml-small.bin` (~466MB) as an optional higher-accuracy model for Philippine languages while remaining well under the 1.2GB memory budget.
-- [ ] Ensure prompt conditioning carries Tagalog medical context (`--prompt "Ito ay konsultasyon sa Barangay Health Station: pasyente, mataas ang BP, lagnat, temperatura, ubo..."`).
+## 3. Active Decisions & Completed Actions
+- [x] Enforce `--language tl` (Tagalog) by default in `app/transcribe.py` so Whisper uses Tagalog tokenizer vocabulary and handles Taglish loanwords without splitting words like "mataas ang".
+- [x] Upgrade to `ggml-small.bin` (~466MB) for 2x–3x higher accuracy on Philippine languages while remaining well under the 1.2GB memory budget.
+- [x] Add beam search (`-bs 4`) in `whisper-cli` decoding loop.
+- [x] Fix Windows `cp1252` encoding crash in `subprocess.run` with `encoding="utf-8"`.
+- [x] Ensure prompt conditioning carries Tagalog medical context (`--prompt "Ito ay konsultasyon sa Barangay Health Station: pasyente, mataas ang BP, lagnat, temperatura, ubo..."`).
+
