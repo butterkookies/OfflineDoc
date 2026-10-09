@@ -11,10 +11,10 @@ Master checklist for OfflineDoc. Tick boxes in commits so the history shows prog
 - [ ] Brian approves `PROJECT_CONTRACT.md` (or changes it) — Brian
 - [ ] Screenshot official participant list showing all 3 members (R1) — Brian
 - [ ] Post Q1 to Q5 in Telegram; log answers in `OFFICIAL_BRIEF.md` (R21) — Brian
-- [ ] First commit: brief, rulebook, contract, plan, checklist (R3) — Andrei
-- [ ] `.gitignore` for `models/`, `bin/`, `data/`, `.venv/` — Andrei
-- [ ] `DISCLOSURES.md` started; log every AI tool as it is used (R4, R12) — Andrei
-- [ ] Agent guardrails (plan B1) shared with every agent session — Andrei
+- [x] First commit: brief, rulebook, contract, plan, checklist (R3) — Andrei
+- [x] `.gitignore` for `models/`, `bin/`, `data/`, `.venv/` — Andrei
+- [x] `DISCLOSURES.md` started; log every AI tool as it is used (R4, R12) — Andrei
+- [x] Agent guardrails (`playbook.md` / plan B1) shared with every agent session — Andrei
 
 ## Phase 1: S0 offline smoke test (3:15 to 5:15 PM)
 
