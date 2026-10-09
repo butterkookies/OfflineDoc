@@ -372,14 +372,14 @@
               Ensure your phone is on the same Wi-Fi, then scan with camera:
             </p>
             <div style="background: #FFFFFF; padding: 10px; border-radius: 12px; display: inline-block; border: 1px solid var(--border-subtle); margin-bottom: 12px; box-shadow: var(--shadow-sm);">
-              <img src="/qr_http.png" alt="Mobile QR Code" width="160" height="160" style="display: block;">
+              <img id="qrImage" src="" alt="Mobile QR Code" width="160" height="160" style="display: block;">
             </div>
-            <div style="font-size: 13.5px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">
-              http://192.168.254.129:8000
+            <div id="qrHttpUrl" style="font-size: 13.5px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">
+              Detecting laptop IP...
             </div>
             <div style="font-size: 11.5px; color: var(--text-subtle); margin-bottom: 14px;">
               For live phone mic recording via HTTPS:<br>
-              <a href="https://192.168.254.129:8443" target="_blank" style="color:var(--primary); font-weight: 600;">https://192.168.254.129:8443</a>
+              <a id="qrHttpsUrl" href="#" target="_blank" style="color:var(--primary); font-weight: 600;">...</a>
             </div>
 
             <!-- Universal Add to Home Screen Guidance -->

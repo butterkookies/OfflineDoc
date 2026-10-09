@@ -1,5 +1,7 @@
+import io
 import os
 import re
+import socket
 import json
 import time
 import subprocess
@@ -9,7 +11,7 @@ from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel
 try:
     from faster_whisper import WhisperModel
@@ -810,6 +812,33 @@ def evaluate_clinical_safety_gaps(data: Dict[str, Any]) -> List[str]:
         alerts.append("Identifier Gap: Patient name was not clearly stated in dictation.")
 
     return alerts
+
+def get_lan_ip():
+    """Best-effort LAN IP of this machine (no packets are actually sent)."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+@app.get("/api/network")
+def get_network_info():
+    """LAN URLs the phone should use (ports match run_mobile.py)."""
+    ip = get_lan_ip()
+    return {"lan_ip": ip, "http_url": f"http://{ip}:8000", "https_url": f"https://{ip}:8443"}
+
+@app.get("/api/qr.svg")
+def get_qr_svg(url: str):
+    """Render a QR code for the given URL as SVG (pure Python, no Pillow needed)."""
+    import qrcode
+    import qrcode.image.svg
+    img = qrcode.make(url, image_factory=qrcode.image.svg.SvgPathImage, box_size=8, border=2)
+    buf = io.BytesIO()
+    img.save(buf)
+    return Response(content=buf.getvalue(), media_type="image/svg+xml")
 
 @app.get("/api/patients")
 def get_patients():
