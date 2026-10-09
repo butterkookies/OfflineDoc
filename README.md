@@ -164,7 +164,7 @@ This executes all 7 end-to-end verification suites against the running engine:
 * Scenario B: Hypertensive crisis danger sign alert (BP 150/95 mmHg)
 * Scenario C: Missing vitals point-of-care gap alert (unmeasured BP)
 * Scenario D: Child immunization EPI catch-up extraction
-* Scenario E: 4-cohort directory integrity & PDF generation verification
+* Scenario E: Patient directory integrity & PDF generation verification
 
 ---
 

@@ -74,14 +74,14 @@ if (-not (Test-Path $llamaServerExe)) {
     Write-Host "`n[3/4] llama-server.exe already exists." -ForegroundColor Green
 }
 
-# 4. Download Llama 3.2 3B Instruct GGUF or Qwen 2.5 1.5B GGUF
-$llmModel = Join-Path $modelsDir "Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+# 4. Download Llama 3.2 1B Instruct GGUF (must match LLM_MODEL_PATH in server.py)
+$llmModel = Join-Path $modelsDir "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
 if (-not (Test-Path $llmModel)) {
-    Write-Host "`n[4/4] Downloading Llama 3.2 3B Instruct Q4_K_M GGUF (~2.0 GB)..." -ForegroundColor Yellow
+    Write-Host "`n[4/4] Downloading Llama 3.2 1B Instruct Q4_K_M GGUF (~0.8 GB)..." -ForegroundColor Yellow
     Write-Host "Note: This provides high-accuracy Taglish clinical entity extraction." -ForegroundColor Gray
-    $llmUrl = "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+    $llmUrl = "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
     Invoke-WebRequest -Uri $llmUrl -OutFile $llmModel -UserAgent "OfflineDoc-Installer"
-    Write-Host "Llama 3.2 3B model ready at: $llmModel" -ForegroundColor Green
+    Write-Host "Llama 3.2 1B model ready at: $llmModel" -ForegroundColor Green
 } else {
     Write-Host "`n[4/4] Llama 3.2 model already exists." -ForegroundColor Green
 }
