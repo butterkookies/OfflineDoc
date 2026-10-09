@@ -102,15 +102,15 @@ REPORT BACK:
 | Card ID | Slice | Title | Primary Responsibility |
 |---|---|---|---|
 | **AG-01** | S1 | Repo Scaffold & Health Endpoint | Set up folder hierarchy, `requirements.txt`, `GET /api/health` |
-| **AG-02** | S0/S1 | Model & Binary Setup Scripts | `scripts/setup_models.ps1` and `scripts/start.ps1` |
-| **AG-03** | S1 | In-Browser 16 kHz WAV Recorder | `web/recorder.js` with Web Audio API / AudioWorklet |
-| **AG-04** | S1 | Audio Validation & Whisper Transcription | `app/validate.py`, `app/transcribe.py`, `POST /api/transcribe` |
-| **AG-05** | S2 | Schema & llama-server Extraction | `app/schema.py`, `app/extract.py`, JSON schema grammar |
-| **AG-06** | S2 | Evidence Quote Verification | `app/evidence.py`, exact & fuzzy transcript span matcher |
-| **AG-07** | S3 | Review & Interactive Grounding UI | 3-screen SPA, two-way span highlighting, flagged field review |
-| **AG-08** | S4 | Visit Storage & PDF/Checklist Export | `app/storage.py`, `app/export_pdf.py` (fpdf2), plain-text checklist |
+| **AG-02** | S0/S1 | Model & Binary Setup Scripts | `scripts/setup_models.ps1` (whisper, llama-server, base.bin, 1.5B GGUF) and `start.ps1` |
+| **AG-03** | S1 | In-Browser 16 kHz WAV Recorder | `web/recorder.js` with `AudioContext({sampleRate: 16000})`, touch-friendly mobile button |
+| **AG-04** | S1 | Audio Validation & Taglish Transcription | `app/validate.py`, `app/transcribe.py` with Philippine medical vocabulary primer |
+| **AG-05** | S2 | Schema v2 & Taglish Clinical Extraction | `app/schema.py`, `app/extract.py` (bilingual extraction + referral object) |
+| **AG-06** | S2 | Evidence Quote Verification | `app/evidence.py`, exact & fuzzy Taglish transcript span matcher |
+| **AG-07** | S3 | Mobile Review & Interactive Grounding UI | 390px Mobile PWA card layout, two-way span highlighting, bottom confirm bar |
+| **AG-08** | S4 | Visit Storage & Referral Slip PDF Export | `app/storage.py`, `app/export_pdf.py` (Visit PDF + Barangay Referral Slip), checklist |
 | **AG-09** | S5 | Fallbacks & Error States | Typed notes, WAV upload, offline banner, sample replay mode |
-| **AG-10** | S6 | Evaluation Harness | `eval/run_eval.py`, latency/accuracy computation on synthetic visits |
+| **AG-10** | S6 | Evaluation Harness | `eval/run_eval.py`, latency/accuracy computation on synthetic Taglish visits |
 | **AG-11** | S7 | Complete Submission Docs Drafts | `README.md`, `ARCHITECTURE.md`, `DEMO_RUNBOOK.md`, `SUBMISSION.md` |
 | **AG-12** | S8 | Optional Gap Check / Confidence Review | Point-of-care follow-up (only if approved at 2:00 AM gate) |
 

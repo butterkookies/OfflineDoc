@@ -30,10 +30,11 @@ The following AI tools and coding assistants were used for development, architec
 
 | Component | Model / Engine | Version / Checkpoint | License | Purpose | What Runs Locally |
 |---|---|---|---|---|---|
-| **Speech-to-Text** | `whisper.cpp` (`whisper-cli` binary) | v1.7.x / latest Windows x64 release | MIT | Audio transcription of spoken visit summaries | 100% on CPU (or Vulkan if enabled) |
-| **STT Weights** | `ggml-base.en.bin` (fallback: `ggml-tiny.en.bin`) | OpenAI Whisper checkpoint converted to GGML | MIT | English speech transcription (~140MB) | Fully local on disk in `models/` |
+| **Speech-to-Text** | `whisper.cpp` (`whisper-cli` / daemon binary) | v1.7.x / latest Windows x64 release | MIT | Audio transcription of spoken Taglish/English visit summaries | 100% on CPU (or Vulkan if enabled) |
+| **STT Weights** | `ggml-base.bin` (multilingual ~142MB) | OpenAI Whisper checkpoint converted to GGML | MIT | Taglish speech transcription primed with Philippine clinical vocabulary | Fully local on disk in `models/` |
 | **LLM Inference** | `llama.cpp` (`llama-server` binary) | b3900+ Windows x64 release | MIT | Local HTTP server (`127.0.0.1:8081`) serving schema-constrained extraction | 100% on-device inference |
-| **LLM Weights** | 3B-class Instruct GGUF (e.g., `Llama-3.2-3B-Instruct-Q4_K_M.gguf` or `Qwen2.5-3B-Instruct-Q4_K_M.gguf`) | Quantization: Q4_K_M (~2.0–2.2 GB) | Llama 3.2 Community License / Qwen Research/Apache License | Structured JSON extraction with verbatim quote grounding | Fully local on disk in `models/` |
+| **LLM Weights** | 1B–1.5B Instruct GGUF (`Qwen2.5-1.5B-Instruct-Q4_K_M.gguf` ~1.0GB or `Llama-3.2-1B-Instruct-Q4_K_M.gguf` ~750MB) | Quantization: Q4_K_M | Qwen Research / Apache 2.0 / Llama 3.2 Community License | Structured JSON extraction, bilingual normalization, quote grounding, and referral triage | Fully local on disk in `models/` |
+| **Combined Footprint** | STT + LLM | Strict $\le$ 1.2GB RAM | Open Source | Fits inside RAM limits of ₱5,000–₱8,000 Android phones and laptops | 100% On-Device Memory |
 
 ---
 
@@ -104,3 +105,4 @@ Whenever a new model, library, or tool is introduced during the hackathon, log i
 | 2026-10-09 15:30 | Antigravity IDE, Claude, Gemini | AI Dev Tools | Andrei / Brian |
 | 2026-10-09 16:00 | whisper.cpp, llama.cpp, base.en, 3B GGUF | Local Models | Andrei |
 | 2026-10-09 17:00 | Initialized DISCLOSURES.md | Compliance | Andrei |
+| 2026-10-09 18:15 | Downsized to 1.5B/1B LLM (Qwen2.5/Llama-3.2), base multilingual STT, BHW Referral Slip | Architecture Update | Brian / Andrei |

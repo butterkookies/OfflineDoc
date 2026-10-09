@@ -8,7 +8,7 @@ Master checklist for OfflineDoc. Tick boxes in commits so the history shows prog
 
 ## Phase 0: Setup and compliance (now to 3:30 PM)
 
-- [ ] Brian approves `PROJECT_CONTRACT.md` (or changes it) — Brian
+- [x] Brian approves `PROJECT_CONTRACT.md` (BHW scope, Taglish, Referral Slip confirmed) — Brian
 - [ ] Screenshot official participant list showing all 3 members (R1) — Brian
 - [ ] Post Q1 to Q5 in Telegram; log answers in `OFFICIAL_BRIEF.md` (R21) — Brian
 - [x] First commit: brief, rulebook, contract, plan, checklist (R3) — Andrei
@@ -16,49 +16,50 @@ Master checklist for OfflineDoc. Tick boxes in commits so the history shows prog
 - [x] `DISCLOSURES.md` started; log every AI tool as it is used (R4, R12) — Andrei
 - [x] Agent guardrails (`playbook.md` / plan B1) shared with every agent session — Andrei
 
-## Phase 1: S0 offline smoke test (3:15 to 5:15 PM)
+## Phase 1: S0 offline smoke test (5:15 to 6:30 PM)
 
 - [ ] Download whisper.cpp + llama.cpp Windows binaries; note versions — Andrei
-- [ ] Download `ggml-base.en.bin` and `tiny.en` fallback; note SHA256 — Andrei
-- [ ] Download two 3B-class instruct GGUF candidates (Q4_K_M) — Andrei
-- [ ] Record 5 English + 5 Taglish scripted clips (synthetic) — Christian
-- [ ] Wi-Fi **off**: time transcription of each clip — Christian
-- [ ] Wi-Fi **off**: time extraction with llama-server + JSON schema — Christian
+- [ ] Download `ggml-base.bin` (multilingual ~142MB); note SHA256 — Andrei
+- [ ] Download 1.5B / 1B GGUF (`Qwen2.5-1.5B-Instruct` or `Llama-3.2-1B-Instruct` Q4_K_M ~800MB) — Andrei
+- [ ] Record 5 Taglish scripted clips (synthetic) with Philippine medical terms — Christian
+- [ ] Wi-Fi **off**: time transcription of each clip using `--initial-prompt` — Christian
+- [ ] Wi-Fi **off**: time extraction with llama-server + JSON schema v2 — Christian
 - [ ] Write raw timings to `eval/results/s0_smoke.md` — Christian
-- [ ] **Go / Adjust / Switch decision at 5:15 PM** — Brian
-- [ ] Decide whisper model, LLM, and Taglish in/out; update contract — Brian
+- [x] **Go / Adjust / Switch decision**: Taglish IN, 1.5B model IN, Referral Slip IN — Brian
 
-## Phase 2: Core build (5:15 PM to midnight)
+## Phase 2: Core build (6:30 PM to midnight)
 
-### S1 Skeleton + Record
+### S1 Skeleton + Mobile Record
 - [ ] AG-01 Repo scaffold, `/api/health`
-- [ ] AG-02 `setup_models.ps1` + `start.ps1`
-- [ ] AG-03 In-browser 16 kHz WAV recorder
-- [ ] AG-04 Validation (≥ 2 s, not silent, non-empty transcript) + `/api/transcribe`
+- [ ] AG-02 `setup_models.ps1` + `start.ps1` (downloads whisper, llama-server, base.bin, 1.5B GGUF)
+- [ ] AG-03 Mobile-friendly 16 kHz WAV recorder in browser (`recorder.js`, touch button)
+- [ ] AG-04 Validation (≥ 2 s, not silent, non-empty) + `/api/transcribe` with Taglish priming
 - [ ] Audio deleted after transcription by default
-- [ ] Milestone: speak in browser → transcript shown (Wi-Fi off)
+- [ ] Milestone: speak Taglish on mobile UI → accurate transcript shown (Wi-Fi off)
 
-### S2 Extraction
-- [ ] AG-05 Schema in one place; schema-constrained extraction, temp 0
+### S2 Taglish Clinical Extraction
+- [ ] AG-05 Schema v2 in one place (vitals, follow_up, referral object); temp 0.0 extraction
+- [ ] Bilingual prompt: Taglish input → English clinical schema + verbatim Taglish evidence quotes
 - [ ] Null-not-guess verified on a transcript with missing fields
-- [ ] AG-06 Evidence quote verification with spans; unverified flag
-- [ ] Milestone: 5 of 5 sample transcripts → valid JSON
+- [ ] AG-06 Evidence quote verification with character spans; unverified flag
+- [ ] Milestone: 5 of 5 Taglish sample transcripts → valid schema JSON
 
-### S3 Review
-- [ ] AG-07 Record / Review / Export screens
-- [ ] Field ↔ transcript highlight both ways
-- [ ] Out-of-range and unverified fields flagged
-- [ ] Edit any field; Confirm gated on reviewing flagged fields
+### S3 Mobile Review
+- [ ] AG-07 Mobile PWA Record / Review / Export screens (390px viewport, touch cards)
+- [ ] Two-way interactive highlighting: field ↔ Taglish transcript span
+- [ ] Out-of-range (high BP/fever) and unverified fields visually flagged
+- [ ] Edit any field; bottom **Confirm & Sign** bar gated on review
 - [ ] Offline indicator visible
 - [ ] Brian UX pass
-- [ ] Milestone: Record → Review → Confirm end to end
+- [ ] Milestone: Record → Review → Confirm end to end on mobile viewport
 
-### S4 Export
+### S4 Export & Barangay Referral Slip
 - [ ] AG-08 One JSON per visit (transcript, extraction, edits, confirmed time, model versions)
-- [ ] PDF report via fpdf2 with bundled font; "reviewed and confirmed" line; synthetic-data footer
-- [ ] Plain-text follow-up checklist
+- [ ] PDF visit report via fpdf2 with bundled TTF font (UTF-8 safe for `ñ`, `₱`, quotes)
+- [ ] **Barangay Health Station Referral Slip (PDF)** generated when patient is referred to RHU/doctor
+- [ ] Plain-text follow-up checklist (*Talaan ng Gawain*)
 - [ ] Export blocked before Confirm
-- [ ] Milestone: full demo flow works in airplane mode
+- [ ] Milestone: full mobile demo flow works in airplane mode
 
 ## Phase 3: Hardening (11 PM to 2 AM)
 

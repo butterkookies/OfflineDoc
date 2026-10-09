@@ -1,9 +1,9 @@
 # IMPLEMENTATION_PLAN.md
 
-**Status:** DRAFT v1 (Oct 9, ~3:05 PM PHT). Derived from `OFFICIAL_BRIEF.md`, `RULEBOOK.md`, and `PROJECT_CONTRACT.md`. If this file disagrees with the contract, the contract wins. RECOMMENDED items stay `Next` until Brian approves them.
+**Status:** APPROVED v2 (Oct 9, ~6:10 PM PHT). Derived from `OFFICIAL_BRIEF.md`, `RULEBOOK.md`, and the approved `PROJECT_CONTRACT.md`. All additions (Taglish, Barangay Referral Slip, Mobile PWA layout) are confirmed.
 
 **Owners:** Brian (Product + Demo), Andrei (Build), Christian (Quality).
-**Time left:** about 19 hours. Hard deadline 10:00 AM Oct 10 (R14, R15). Internal code freeze 8:30 AM.
+**Time left:** ~16 hours. Hard deadline 10:00 AM Oct 10 (R14, R15). Internal code freeze 8:30 AM.
 
 ---
 
@@ -19,36 +19,36 @@
 
 ```mermaid
 flowchart LR
-  UI["Browser SPA (127.0.0.1)<br/>Record / Review / Export"] -->|"WAV 16 kHz mono"| API["Python backend (FastAPI)"]
-  API -->|subprocess| W["whisper.cpp<br/>(whisper-cli + ggml model)"]
-  API -->|"HTTP 127.0.0.1:8081<br/>json_schema"| L["llama.cpp llama-server<br/>(3B instruct GGUF)"]
+  UI["Mobile-First PWA (390px / 127.0.0.1)<br/>Record / Review / Export"] -->|"WAV 16 kHz mono"| API["Python backend (FastAPI)"]
+  API -->|subprocess/daemon| W["whisper.cpp (ggml-base multilingual)<br/>+ Taglish prompt priming"]
+  API -->|"HTTP 127.0.0.1:8081<br/>json_schema"| L["llama.cpp llama-server<br/>(1.5B/1B instruct GGUF: Qwen2.5 / Llama-3.2)"]
   API --> S["visits/&lt;id&gt;.json"]
-  API --> E["exports/&lt;id&gt;.pdf + checklist.txt"]
+  API --> E["exports/&lt;id&gt;_visit.pdf<br/>exports/&lt;id&gt;_referral.pdf<br/>exports/&lt;id&gt;_checklist.txt"]
 ```
 
 | Decision | Choice | Why |
 |---|---|---|
 | Backend | Python 3.11+, FastAPI + Uvicorn, bound to `127.0.0.1` only | Contract: Python backend, local only |
-| Speech | whisper.cpp prebuilt Windows binary, `ggml-base.en` (fallback `tiny.en`; `small` if Taglish passes S0) | Contract; fast on CPU |
-| LLM | llama.cpp `llama-server`, 3B-class instruct GGUF at Q4_K_M (e.g. Qwen2.5-3B-Instruct or Llama-3.2-3B-Instruct; pick in S0) | Contract; JSON-schema-constrained output |
-| Audio capture | Record WAV 16 kHz mono **in the browser** (Web Audio + AudioWorklet/ScriptProcessor, resample, encode WAV) | Avoids an ffmpeg dependency; MediaRecorder gives webm/opus, which whisper.cpp cannot read directly |
-| Uploaded audio | Accept `.wav` only unless ffmpeg is found on PATH; show a clear message otherwise | Keeps the fresh-clone install small |
+| Speech | whisper.cpp, `ggml-base.bin` (multilingual ~142MB) with `--initial-prompt` Taglish vocabulary priming | Supports mixed Filipino-English dictation without phonetic corruption |
+| LLM | llama.cpp `llama-server`, 1B–1.5B instruct GGUF at Q4_K_M (`Qwen2.5-1.5B-Instruct` or `Llama-3.2-1B-Instruct` ~800MB) | Fits $\le$ 1.2GB total memory budget for budget ₱6,000 Android phones; fast token generation |
+| Audio capture | Record WAV 16 kHz mono **in browser** (`AudioContext({sampleRate: 16000})` + AudioWorklet) | Native browser resampling; zero system ffmpeg dependency |
+| Uploaded audio | Accept `.wav` only unless ffmpeg is found on PATH; show a clear message otherwise | Keeps fresh-clone install small |
 | Storage | One JSON file per visit in `data/visits/`; audio deleted after transcription by default | Contract: no database |
-| PDF | `fpdf2` (pure Python) with a bundled TTF font | Works offline; no system deps |
-| Frontend | Vanilla HTML/CSS/JS, **all assets local** (no CDN, no Google Fonts) | Must work in airplane mode (R6) |
+| PDF | `fpdf2` (pure Python) with bundled Unicode TTF font (`Inter.ttf` or `DejaVuSans.ttf`) | Works offline; generates Visit Summary AND Barangay Referral Slip without encoding crashes |
+| Frontend | Vanilla HTML/CSS/JS **Mobile-First PWA** (390px viewport, manifest.json, all assets local) | Touch-friendly for phone screens in airplane mode; zero CDN/Google Fonts (R6) |
 
 ### Repo layout (target)
 
 ```text
 OfflineDoc/
   README.md  DISCLOSURES.md  ARCHITECTURE.md  DEMO_RUNBOOK.md  SUBMISSION.md
-  OFFICIAL_BRIEF.md  RULEBOOK.md  PROJECT_CONTRACT.md  IMPLEMENTATION_PLAN.md  CHECKLIST.md
+  OFFICIAL_BRIEF.md  RULEBOOK.md  PROJECT_CONTRACT.md  IMPLEMENTATION_PLAN.md  CHECKLIST.md  playbook.md
   requirements.txt  .gitignore  config.example.toml
   scripts/  setup_models.ps1  start.ps1  smoke_test.py
   app/      main.py  config.py  validate.py  transcribe.py  extract.py  evidence.py
             schema.py  storage.py  export_pdf.py  checklist.py
-  web/      index.html  styles.css  app.js  recorder.js  fonts/
-  eval/     visits/*.json (synthetic scripts + gold labels)  audio/ (synthetic clips)
+  web/      index.html  styles.css  app.js  recorder.js  manifest.json  fonts/
+  eval/     visits/*.json (synthetic Taglish scripts + gold labels)  audio/ (synthetic clips)
             run_eval.py  results/ (raw outputs, committed)
   tests/    test_validate.py  test_evidence.py  test_schema.py  test_export.py
   models/   (gitignored; filled by setup_models.ps1)
@@ -56,30 +56,30 @@ OfflineDoc/
   data/     (gitignored; visits and exports)
 ```
 
-### Visit record schema (v1)
+### Visit record schema (v2)
 
-Every field is `{ "value": <type or null>, "evidence": <exact transcript quote or null> }`. Unstated values are `null`, never guessed.
+Every field is `{ "value": <type or null>, "evidence": <exact transcript quote or null> }`. Unstated values are strictly `null`, never guessed.
 
 | Field | Type | Notes |
 |---|---|---|
-| `patient_label` | string | Alias or initials only in demo; synthetic |
-| `visit_date` | string (ISO date) | Default to today in UI only if user confirms; LLM must not invent |
+| `patient_label` | string | Alias or initials only in demo (synthetic) |
+| `visit_date` | string (ISO date) | Default to today in UI; LLM must not invent |
 | `location` | string | Barangay / sitio |
 | `age_years` | number | |
 | `sex` | enum `female`/`male` | |
-| `chief_complaint` | string | |
-| `symptoms` | string[] | |
-| `vitals.bp` | string `"120/80"` | Range-checked in S3 |
-| `vitals.temp_c` | number | Range 34 to 43 |
+| `chief_complaint` | string | Standardized English clinical description |
+| `symptoms` | string[] | Standardized clinical terms |
+| `vitals.bp` | string `"120/80"` | Range-checked in S3; flagged if $\ge$ 140/90 |
+| `vitals.temp_c` | number | Range 34 to 43; flagged if $\ge$ 38.0 |
 | `vitals.pulse_bpm` | number | Range 30 to 220 |
 | `vitals.resp_rate` | number | Range 6 to 60 |
 | `vitals.weight_kg` | number | Range 1 to 250 |
-| `medications_given` | string[] | As stated; no dosing advice generated |
-| `advice_given` | string[] | What the worker said they advised |
-| `follow_up` | `{task, due}`[] | Becomes the checklist |
-| `referral` | string | Facility named by the worker |
+| `medications_given` | string[] | As stated; no autonomous dosing advice generated |
+| `advice_given` | string[] | What the BHW said they advised |
+| `follow_up` | `{task, due}`[] | Populates the *Talaan ng Gawain* checklist |
+| `referral` | `{facility, reason, urgency}` or `null` | Populates the **Barangay Referral Slip** if patient needs RHU doctor |
 
-The schema is shared by `app/schema.py` (JSON Schema for llama-server), the Review form, the PDF, and the eval script. Change it in one place only.
+The schema is shared across `app/schema.py` (JSON Schema for llama-server), the Review form, the PDF exporters, and the eval harness.
 
 ---
 
@@ -87,28 +87,26 @@ The schema is shared by `app/schema.py` (JSON Schema for llama-server), the Revi
 
 | Slice | Window | Goal | Lead | Gate / exit criterion |
 |---|---|---|---|---|
-| S0 Offline smoke test | 3:15 to 5:15 PM | Binaries + models run on the **demo laptop** in airplane mode | Andrei (exec), Christian (evidence) | **Go/no-go by Brian at 5:15 PM** (see 2.1) |
-| S1 Skeleton + Record | 5:15 to 7:30 PM | Local server, Record screen, WAV upload, validation, transcription endpoint | Andrei + agent | Speak in browser, transcript appears |
-| S2 Extraction | 6:30 to 9:00 PM | Schema-constrained extraction with evidence quotes and verification | Andrei + agent | Valid JSON for 5 of 5 sample transcripts |
-| S3 Review | 8:00 to 11:00 PM | Form + highlighted transcript, field ↔ quote linking, edit, Confirm | agent + Brian (UX) | End-to-end Record → Review works |
-| S4 Export | 10:00 PM to 12:00 AM | PDF report + plain-text checklist; JSON saved; audio deleted | agent | PDF opens, checklist matches `follow_up` |
-| S5 Fallbacks + offline indicator | 11:00 PM to 1:00 AM | Typed notes, WAV upload, labeled sample mode, offline badge, errors | agent + Christian | Every failure path shows a clear message |
-| S6 Eval | 9:00 PM to 2:00 AM (parallel) | Synthetic visits, eval script, raw results committed | Christian + agent | `eval/results/` committed; numbers reproducible |
-| S7 Docs + fresh-clone test | 1:00 to 4:00 AM | README, DISCLOSURES, ARCHITECTURE, DEMO_RUNBOOK, SUBMISSION | agent drafts, Andrei/Brian edit, Christian tests | Christian recreates from a clean clone |
-| S8 Optional (if approved) | 2:00 to 6:00 AM | Point-of-care gap check, confidence-guided review | agent | Only if S0 to S7 green by 2:00 AM |
-| Video + post | 6:00 to 8:00 AM | ~1-minute demo video, X/LinkedIn post | Brian | Post live, URL copied |
-| Freeze + submit | 8:30 to 9:30 AM | Final commit, repo public, submit once | Brian + Andrei | Confirmation by 9:30 AM (30 min buffer) |
-| Sleep shifts | 2:00 to 6:00 AM rolling | At least one person rested for Demo Day | all | Brian sleeps by 3:00 AM at the latest |
+| S0 Offline smoke test | 5:15 to 6:30 PM | Binaries + 1.5B model + multilingual Whisper run on laptop in airplane mode | Andrei (exec), Christian (evidence) | Sub-10s transcription & sub-10s extraction |
+| S1 Skeleton + Mobile Record | 6:30 to 8:30 PM | Local server, Mobile PWA Record screen, WAV capture, validation, transcription endpoint | Andrei + agent | Speak Taglish in mobile UI $\rightarrow$ transcript appears |
+| S2 Taglish Extraction | 8:00 to 10:00 PM | Schema-constrained extraction; Taglish quote grounding and evidence verification | Andrei + agent | Valid JSON with verbatim Taglish quotes for 5/5 samples |
+| S3 Mobile Review | 9:30 PM to 12:00 AM | Touch review form + quote highlight, out-of-range flags, Confirm button | agent + Brian (UX) | Mobile card layout: field $\leftrightarrow$ quote interactive linking |
+| S4 Export & Referral Slip | 11:30 PM to 1:30 AM | PDF visit report + Barangay Referral Slip + checklist.txt; JSON saved | agent | Both PDFs generate cleanly with bundled TTF font |
+| S5 Fallbacks + offline badge | 1:00 to 2:30 AM | Typed notes, WAV upload, labeled sample mode, offline badge, error UI | agent + Christian | Clear, honest messaging across all failure paths |
+| S6 Eval | 10:00 PM to 3:00 AM (parallel) | Synthetic Taglish visits, eval script, raw results committed | Christian + agent | `eval/results/` committed; reproducible numbers |
+| S7 Docs + fresh-clone test | 2:30 to 5:00 AM | README, DISCLOSURES, ARCHITECTURE, DEMO_RUNBOOK, SUBMISSION | agent drafts, Andrei/Brian edit, Christian tests | Christian recreates from clean clone (R16) |
+| S8 Polish & Rehearsal | 5:00 to 7:00 AM | Demo video, phone-to-projector checks, timed pitch rehearsal | Brian + team | 5-minute timed live demo pitch green |
+| Video + post | 7:00 to 8:30 AM | ~1-minute demo video, X/LinkedIn post (#AppBuildersPH @Devin) | Brian | Post live, URL copied |
+| Freeze + submit | 8:30 to 9:30 AM | Final commit, repo public, single submission on Cerebral Valley | Brian + Andrei | Confirmation by 9:30 AM (30 min buffer) |
 
 ### 2.1 S0 go/no-go criteria (measured on the demo laptop, Wi-Fi off)
 
 | Check | Pass | Fallback if it fails |
 |---|---|---|
-| whisper.cpp transcribes a 30 s English clip | ≤ 15 s wall time, readable output | `tiny.en`; then shorter clips (20 s) |
-| Accuracy on 5 scripted clips | Key facts (numbers, names, meds) correct in ≥ 4 of 5 | Speak slower; pick a better mic; `small.en` if speed allows |
-| llama-server extraction of one transcript | Valid schema JSON in ≤ 30 s | Smaller model (1.5B) or fewer fields |
-| Total Record → filled form | ≤ 60 s | Trim schema; show progress UI |
-| Taglish (5 clips, multilingual model) | Acceptable on ≥ 4 of 5 | Stay English-only (already in cut list) |
+| whisper.cpp transcribes 25s Taglish clip | $\le$ 10s wall time, readable text | `tiny` multilingual; refine `--initial-prompt` |
+| Taglish accuracy on 5 scripted clips | Key facts (vitals, names, meds) captured in $\ge$ 4 of 5 | Speak clearly; adjust vocabulary primer |
+| llama-server extraction with 1.5B GGUF | Valid schema JSON in $\le$ 12s | 1B model (`Llama-3.2-1B-Instruct`) |
+| Total turnaround (Audio $\rightarrow$ Filled form) | $\le$ 22s total | Compact schema; temperature 0.0 |
 
 Christian records the raw timings in `eval/results/s0_smoke.md`. Brian decides Go / Adjust / Switch at 5:15 PM. Every hour after that makes a concept switch more expensive.
 
@@ -188,33 +186,33 @@ Each card: **Inputs → Output → Acceptance criteria**. Do them in order unles
 - **Accept:** `python -m uvicorn app.main:app --host 127.0.0.1` serves an empty page; `/api/health` reports whisper/llama binary and model presence.
 
 #### AG-02 Model + binary setup script (S0/S1, parallel)
-- **Inputs:** chosen whisper.cpp and llama.cpp release versions and model filenames from S0.
+- **Inputs:** whisper.cpp + llama.cpp Windows binaries; `ggml-base.bin` (multilingual ~142MB); `Qwen2.5-1.5B-Instruct-Q4_K_M.gguf` (or `Llama-3.2-1B-Instruct-Q4_K_M.gguf` ~800MB).
 - **Output:** `scripts/setup_models.ps1` (downloads to `bin/` and `models/`, verifies SHA256), `scripts/start.ps1` (starts llama-server on 127.0.0.1:8081, then the app).
 - **Accept:** fresh folder → run setup → run start → health check green. Script prints that internet is needed only here.
 
 #### AG-03 In-browser WAV recorder (S1)
-- **Output:** `web/recorder.js` capturing mic, resampling to 16 kHz mono PCM, encoding WAV; timer and level meter.
-- **Accept:** produces a valid WAV that whisper-cli transcribes; works in Chrome and Edge on `127.0.0.1`.
+- **Output:** `web/recorder.js` capturing mic via `AudioContext({sampleRate: 16000})`, encoding 16 kHz mono PCM WAV; mobile-friendly touch record button, timer, and audio level meter.
+- **Accept:** produces a valid 16 kHz WAV that whisper transcribes; works in mobile Chrome/Edge viewports on `127.0.0.1`.
 
-#### AG-04 Validation + transcription endpoint (S1)
-- **Output:** `app/validate.py` (duration ≥ ~2 s, RMS above silence threshold, non-empty transcript), `app/transcribe.py` (subprocess to whisper-cli, timeout, returns text + segments + timings), `POST /api/transcribe`.
-- **Accept:** silent or 1-second clip → clear 400 error; good clip → transcript + `elapsed_ms`; audio deleted afterward unless `keep_audio=true` in config. Unit tests for validation.
+#### AG-04 Validation + Taglish transcription endpoint (S1)
+- **Output:** `app/validate.py` (duration ≥ ~2 s, RMS above silence threshold, non-empty transcript), `app/transcribe.py` (calls whisper with `--initial-prompt` containing Philippine clinical vocabulary, timeout, returns text + timings), `POST /api/transcribe`.
+- **Accept:** silent or 1-second clip → clear 400 error; Taglish audio clip → transcribed accurately + `elapsed_ms`; audio deleted afterward unless `keep_audio=true` in config. Unit tests for validation.
 
-#### AG-05 Schema + extraction (S2)
-- **Output:** `app/schema.py` (JSON Schema from section 1), `app/extract.py` calling llama-server `/v1/chat/completions` with `response_format: {type: "json_schema"}` (or GBNF grammar), temperature 0, a system prompt enforcing null-not-guess and verbatim evidence quotes. `POST /api/extract`.
-- **Accept:** 5 sample transcripts return schema-valid JSON; a transcript missing vitals returns `null` vitals; timeouts handled.
+#### AG-05 Schema + Taglish clinical extraction (S2)
+- **Output:** `app/schema.py` (JSON Schema v2 with vitals, follow_up, and referral object), `app/extract.py` calling llama-server `/v1/chat/completions` with `response_format: {type: "json_schema"}`, temperature 0.0, system prompt instructing the model to translate Taglish dictation into English clinical fields while preserving verbatim Taglish evidence quotes. `POST /api/extract`.
+- **Accept:** 5 sample Taglish transcripts return schema-valid JSON; missing fields return `null`; referral object extracted when doctor visit mentioned; timeouts handled.
 
 #### AG-06 Evidence verification (S2)
 - **Output:** `app/evidence.py`: for each non-null field, locate the evidence quote in the transcript (exact, then normalized/fuzzy match). Return character spans. If not found → `evidence_status: "unverified"`.
 - **Accept:** tests for exact, case/punctuation differences, and hallucinated quotes. Unverified fields are flagged, never silently accepted.
 
-#### AG-07 Review screen (S3)
-- **Output:** three-screen SPA (Record / Review / Export) in `web/`. Review: form on the left, transcript on the right; clicking a field highlights its span, hovering a span highlights its field; null fields shown empty with a "not stated" hint; editable; unverified and out-of-range fields visibly flagged; **Confirm** disabled until the user has reviewed flagged fields.
-- **Accept:** keyboard-accessible, works at 1366×768 and on a projector; no external assets; visible "Offline · runs on this device" indicator.
+#### AG-07 Mobile-first review screen (S3)
+- **Output:** three-screen Mobile PWA (Record / Review / Export) in `web/`. Review: 390px mobile card layout, collapsible vitals, transcript box; tapping a field highlights its transcript span, hovering/tapping a span highlights its field; null fields shown empty with a "not stated" hint; editable; unverified and out-of-range fields visibly flagged; fixed bottom **Confirm & Sign** bar.
+- **Accept:** touch-accessible, responsive at 390px mobile viewport up to 1366×768 projector; no external assets; visible "Offline · runs on this device" indicator.
 
-#### AG-08 Storage + export (S4)
-- **Output:** `app/storage.py` (one JSON per visit with transcript, extraction, edits, confirmed timestamp, model versions), `app/export_pdf.py` (fpdf2, bundled font, "Reviewed and confirmed by health worker" line, "Synthetic demo data" footer when in demo mode), `app/checklist.py` (plain-text follow-up list). `POST /api/confirm`, `GET /api/export/<id>.pdf|.txt`.
-- **Accept:** PDF opens and matches confirmed values (edits included); checklist equals `follow_up`; export refused before Confirm.
+#### AG-08 Storage + Visit PDF + Barangay Referral Slip export (S4)
+- **Output:** `app/storage.py` (one JSON per visit in `data/visits/`), `app/export_pdf.py` (fpdf2 with bundled Unicode TTF font generating: (1) Patient Visit Summary PDF and (2) Barangay Health Station Referral Slip PDF if referral is indicated), `app/checklist.py` (plain-text follow-up action list). `POST /api/confirm`, `GET /api/export/<id>_visit.pdf`, `GET /api/export/<id>_referral.pdf`, `GET /api/export/<id>_checklist.txt`.
+- **Accept:** both PDFs open cleanly and match confirmed values; special characters (`ñ`, `₱`, quotes) render without encoding crash; checklist equals `follow_up`; export refused before Confirm.
 
 #### AG-09 Fallbacks + error UX (S5)
 - **Output:** typed-notes path (skips whisper), WAV upload path, sample mode loading `eval/visits/demo_sample.json` with a persistent **SAMPLE / NOT LIVE** banner, friendly errors for: no mic permission, llama-server down, model missing, timeout.
