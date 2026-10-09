@@ -14,10 +14,11 @@ Your job is to extract clinical facts into a standardized medical JSON record.
 
 CRITICAL RULES:
 1. Standardize clinical facts into English medical terminology (e.g., "masakit ang ulo" -> "Headache", "nahihilo" -> "Dizziness").
-2. For EVERY extracted fact, find the verbatim Taglish quote from the transcript and place it in the 'evidence' object matching the field name.
-3. If an item was not explicitly mentioned in the transcript, its value MUST BE NULL. Never guess, extrapolate, or hallucinate unstated vitals, symptoms, or diagnoses.
-4. If the health worker states that the patient should go to a doctor, clinic, or Rural Health Unit, extract the 'referral' object with facility, reason, and urgency.
-5. Return ONLY a valid JSON object matching the requested schema.
+2. Extract patient residence location/purok/sitio/barangay/city accurately (e.g., 'Sitio Ilaya', 'Purok 4, Brgy. San Jose', 'Lipa City').
+3. For EVERY extracted fact, find the verbatim Taglish quote from the transcript and place it in the 'evidence' object matching the field name.
+4. If an item was not explicitly mentioned in the transcript, its value MUST BE NULL. Never guess, extrapolate, or hallucinate unstated vitals, symptoms, or diagnoses.
+5. If the health worker states that the patient should go to a doctor, clinic, or Rural Health Unit, extract the 'referral' object with facility, reason, and urgency.
+6. Return ONLY a valid JSON object matching the requested schema.
 """
 
 def extract_clinical_record_fallback(transcript: str) -> Dict[str, Any]:
@@ -42,12 +43,18 @@ def extract_clinical_record_fallback(transcript: str) -> Dict[str, Any]:
         age = int(age_match.group(1))
         evidence["age_years"] = age_match.group(0).strip()
 
-    # 3. Location / Sitio (must match explicit taga/Sitio/Barangay/Purok, NOT naked 'sa')
+    # 3. Location / Sitio / City / Barangay / Purok
     location = None
-    loc_match = re.search(r"(?:taga\s+(?:Sitio\s+|Barangay\s+|Purok\s+)?|Sitio\s+|Barangay\s+|Purok\s+)([A-Za-z0-9]+(?:\s+[A-Za-z0-9]+)?)", transcript, re.IGNORECASE)
+    loc_pattern = (
+        r"(?:taga[-\s]+(?:Sitio\s+|Barangay\s+|Brgy\.?\s+|Purok\s+|Zone\s+)?|"
+        r"Sitio\s+|Barangay\s+|Brgy\.?\s+|Purok\s+|Zone\s+)"
+        r"([A-Za-z0-9\.\,\s\-]+?)"
+        r"(?=\s*\.|\s+Ang\b|\s+May\b|\s+Masakit\b|\s+BP\b|\s+Binigyan\b|\s+Sinabihan\b|\s+Babalikan\b|\s+Nagpa-|\s*$)"
+    )
+    loc_match = re.search(loc_pattern, transcript, re.IGNORECASE)
     if loc_match:
-        candidate = loc_match.group(0).strip()
-        if not re.search(r"RHU|doktor|health\s+center|bukas|kahapon", candidate, re.IGNORECASE):
+        candidate = loc_match.group(0).strip().rstrip(".,")
+        if not re.search(r"\b(RHU|doktor|health\s+center|bukas|kahapon|kanina|ospital)\b", candidate, re.IGNORECASE):
             location = candidate
             evidence["location"] = candidate
 
@@ -195,7 +202,7 @@ async def extract_clinical_record(transcript: str) -> Dict[str, Any]:
         try:
             # Hybrid backfill: if 1.5B LLM omitted fields, backfill from Taglish rules
             rule_fallback = extract_clinical_record_fallback(transcript)
-            for k in ["patient_label", "symptoms", "chief_complaint", "location", "medications_given", "follow_up"]:
+            for k in ["patient_label", "symptoms", "chief_complaint", "location", "medications_given", "follow_up", "referral"]:
                 if not record_data.get(k) and rule_fallback.get(k):
                     record_data[k] = rule_fallback[k]
                     if k in rule_fallback.get("evidence", {}):

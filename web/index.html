@@ -75,12 +75,25 @@
           </button>
         </div>
 
+        <!-- Section: Search Bar for Quick Logbook Access -->
+        <div class="search-section">
+          <div class="search-bar-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="inp-search-visits" class="inp-search" placeholder="Mabilisang paghahanap (Pangalan, Purok/Lungsod, Reklamo, Petsa)...">
+            <button type="button" id="btn-clear-search" class="btn-clear-search" style="display: none;">✕</button>
+          </div>
+          <div id="search-status-bar" class="search-status-bar" style="display: none;">
+            <span id="search-match-count">0 rekord ang nahanap</span>
+          </div>
+        </div>
+
         <!-- Section: Follow-Up Tasks (Mga Babalikan) -->
         <div class="logbook-section" id="section-followups" style="display: none;">
           <div class="section-title-row">
             <h4>🗓️ Mga Babalikan (Follow-Up Tasks)</h4>
             <span class="badge-count" id="badge-followup-count">0</span>
           </div>
+          <p class="section-sub-hint">I-tap ang gawain para sa karagdagang impormasyon at pag-edit.</p>
           <div id="followup-list" class="followup-list">
             <!-- Dynamic follow-up items -->
           </div>
@@ -89,9 +102,10 @@
         <!-- Section: Recent Visits Logbook -->
         <div class="logbook-section">
           <div class="section-title-row">
-            <h4>📋 Kamakailang Talaan sa Barangay</h4>
+            <h4>📋 Talaan ng Pagbisita sa Barangay</h4>
             <span class="badge-count" id="badge-visits-count">0</span>
           </div>
+          <p class="section-sub-hint">I-tap ang kahit aling kard upang buksan at i-edit ang rekord.</p>
           <div id="visits-list" class="visits-list">
             <div class="empty-state" id="empty-visits-state">
               <span class="empty-icon">📁</span>
@@ -115,10 +129,15 @@
         <div class="presets-section">
           <span class="presets-label">PUMILI NG KASO PARA SA TELEPROMPTER GABAY:</span>
           <div class="presets-chips">
-            <button type="button" class="preset-chip active" data-preset="hypertension">🩺 Hypertension (Mataas na BP)</button>
+            <button type="button" class="preset-chip active" data-preset="hypertension">🩺 Altapresyon (BP)</button>
             <button type="button" class="preset-chip" data-preset="fever">🌡️ Lagnat / Trangkaso</button>
             <button type="button" class="preset-chip" data-preset="cough">🫁 Ubo at Sipon</button>
-            <button type="button" class="preset-chip" data-preset="general">🏠 Regular na Pagbisita</button>
+            <button type="button" class="preset-chip" data-preset="diarrhea">💧 Pagtatae / Tiyan</button>
+            <button type="button" class="preset-chip" data-preset="wound">🩹 Sugat / Aksidente</button>
+            <button type="button" class="preset-chip" data-preset="prenatal">🤰 Buntis / Prenatal</button>
+            <button type="button" class="preset-chip" data-preset="immunization">👶 Bakuna / Pedia</button>
+            <button type="button" class="preset-chip" data-preset="general">🏠 Regular na Check</button>
+            <button type="button" class="preset-chip" data-preset="custom">✍️ Iba pa (Custom Guide)</button>
           </div>
         </div>
 
@@ -126,9 +145,9 @@
         <div class="teleprompter-card">
           <div class="teleprompter-header">
             <span class="teleprompter-icon">🗣️</span>
-            <span class="teleprompter-title">TELEPROMPTER: BASAHIN HABANG NAGRE-RECORD</span>
+            <span class="teleprompter-title" id="teleprompter-header-title">TELEPROMPTER: BASAHIN HABANG NAGRE-RECORD</span>
           </div>
-          <div class="teleprompter-instruction">
+          <div class="teleprompter-instruction" id="teleprompter-instruction">
             I-palit lamang ang mga may kulay na salita sa totoong detalye ng pasyente:
           </div>
           <div class="teleprompter-text" id="teleprompter-text">
@@ -258,12 +277,35 @@
               <span class="verified-indicator" id="v-complaint"></span>
             </div>
             <div class="form-group">
-              <label>Chief Complaint</label>
-              <input type="text" id="inp-complaint" class="inp-field" placeholder="(Hindi nabanggit)">
+              <label>Chief Complaint (I-type o pumili sa dropdown)</label>
+              <input type="text" id="inp-complaint" class="inp-field" list="list-complaints" placeholder="(Pumili o i-type ang reklamo)">
+              <datalist id="list-complaints">
+                <option value="Ubo at Sipon">
+                <option value="Mataas na Lagnat / Trangkaso">
+                <option value="Masakit ang Ulo at Batok (High BP)">
+                <option value="Pananakit ng Tiyan (Abdominal Pain)">
+                <option value="Pagtatae at Pagsusuka (Diarrhea)">
+                <option value="Hirap sa Paghinga / Hika">
+                <option value="Sugat / Gasgas / Aksidente">
+                <option value="Pananakit ng Katawan at Kasukasuan">
+                <option value="Panghihina at Pagkahilo">
+                <option value="Buntis / Prenatal Check-up">
+                <option value="Bakuna at Timbang ng Bata (Pedia)">
+                <option value="Regular na Konsultasyon / BP Monitoring">
+              </datalist>
             </div>
             <div class="form-group">
-              <label>Mga Sintomas</label>
-              <input type="text" id="inp-symptoms" class="inp-field" placeholder="(Wala)">
+              <label>Mga Sintomas (I-type o pumili sa dropdown)</label>
+              <input type="text" id="inp-symptoms" class="inp-field" list="list-symptoms" placeholder="(Pumili o i-type ang mga sintomas)">
+              <datalist id="list-symptoms">
+                <option value="Masakit ang batok, nahihilo, nanlalabo ang paningin">
+                <option value="Nilalagnat, giniginaw, masakit ang kalamnan">
+                <option value="Inuubo, may plema, makati ang lalamunan">
+                <option value="Madalas na pagdumi na matubig, nanunuyo ang bibig">
+                <option value="Mahapdi ang sugat, may pamamaga at kaunting dugo">
+                <option value="Walang gana kumain, nasusuka, nanghihina">
+                <option value="Masakit ang likod at balakang">
+              </datalist>
             </div>
           </div>
 
@@ -295,12 +337,35 @@
               <span class="field-title">Gamot at Payo ng BHW</span>
             </div>
             <div class="form-group">
-              <label>Gamot na Naibigay / Iniinom</label>
-              <input type="text" id="inp-meds" class="inp-field" placeholder="(Wala)">
+              <label>Gamot na Naibigay / Iniinom (I-type o pumili)</label>
+              <input type="text" id="inp-meds" class="inp-field" list="list-meds" placeholder="(Pumili o i-type ang gamot)">
+              <datalist id="list-meds">
+                <option value="Paracetamol 500mg tab (tuwing 4 oras kung may lagnat)">
+                <option value="Oresol / ORS sa 1 litrong malinis na inuming tubig">
+                <option value="Losartan 50mg tab (1 tableta araw-araw)">
+                <option value="Amlodipine 5mg tab (1 tableta tuwing gabi)">
+                <option value="Amoxicillin 500mg cap (tuwing 8 oras sa loob ng 7 araw)">
+                <option value="Cetirizine 10mg tab (1 tableta sa gabi)">
+                <option value="Salbutamol syrup / Inhaler">
+                <option value="Antacid chewable tab (pagkatapos kumain)">
+                <option value="Ferrous Sulfate + Folic Acid (para sa buntis)">
+                <option value="Multivitamins / Vitamin C">
+                <option value="Povidone Iodine (Betadine) at sterile gauze dressing">
+              </datalist>
             </div>
             <div class="form-group">
-              <label>Payo / Tagubilin</label>
-              <input type="text" id="inp-advice" class="inp-field" placeholder="(Wala)">
+              <label>Payo / Tagubilin (I-type o pumili)</label>
+              <input type="text" id="inp-advice" class="inp-field" list="list-advice" placeholder="(Pumili o i-type ang payo)">
+              <datalist id="list-advice">
+                <option value="Uminom ng 8-10 basong tubig at magpahinga nang maayos.">
+                <option value="I-monitor ang BP araw-araw (umaga at gabi) at itala sa papel.">
+                <option value="Uminom ng Oresol pagkatapos ng bawat pagdumi upang maiwasan ang dehydration.">
+                <option value="Iwasan ang labis na maaalat, matataba, at mamantikang pagkain.">
+                <option value="Panatilihing malinis at tuyo ang sugat; hugasan ng malinis na tubig at sabon.">
+                <option value="Kung hindi bumaba ang lagnat sa loob ng 2-3 araw, magpakonsulta agad sa RHU.">
+                <option value="Ituloy ang regular na pag-inom ng maintenance na gamot, huwag lilibanan.">
+                <option value="Agarang dalhin sa pinakamalapit na ospital kung magkaroon ng hirap sa paghinga o pangingisay.">
+              </datalist>
             </div>
           </div>
 
@@ -310,15 +375,18 @@
               <span class="field-title">📸 Litrato ng Pasyente / Kondisyon (Clinical Photo)</span>
               <span class="badge-optional">OPTIONAL</span>
             </div>
-            <p class="field-subtext">Maaaring kumuha ng litrato ng pasyente, sugat, pantal, o pakete ng gamot para maisama sa opisyal na PDF report.</p>
+            <p class="field-subtext">Maaaring kumuha ng litrato ng pasyente, sugat, pantal, o pakete ng gamot gamit ang camera o gallery para maisama sa opisyal na PDF report.</p>
             
             <div class="photo-actions-row" id="photo-actions-row">
+              <button type="button" id="btn-open-live-cam" class="btn-secondary btn-photo">
+                🎥 Live Camera
+              </button>
               <label class="btn-secondary btn-photo">
-                📷 Kumuha ng Litrato (Camera)
+                📷 Device Camera
                 <input type="file" id="inp-camera-photo" accept="image/*" capture="environment" style="display: none;">
               </label>
               <label class="btn-secondary btn-photo">
-                🖼️ Pumili sa Gallery
+                🖼️ Gallery
                 <input type="file" id="inp-gallery-photo" accept="image/*" style="display: none;">
               </label>
             </div>
@@ -342,8 +410,16 @@
               <span class="field-title">🗓️ Plano sa Pagbalik (Babalikan)</span>
             </div>
             <div class="form-group">
-              <label>Kailan Babalikan / Gagawin</label>
-              <input type="text" id="inp-follow-up" class="inp-field" placeholder="(Walang itinakdang balik)">
+              <label>Kailan Babalikan / Gagawin (I-type o pumili)</label>
+              <input type="text" id="inp-follow-up" class="inp-field" list="list-followup" placeholder="(Walang itinakdang balik)">
+              <datalist id="list-followup">
+                <option value="Bukas ng umaga para sa re-check ng BP">
+                <option value="Pagkatapos ng 2 araw para suriin ang lagnat at sintomas">
+                <option value="Sa darating na Biyernes">
+                <option value="Sa darating na Lunes para sa follow-up check">
+                <option value="Pagkalipas ng 1 linggo">
+                <option value="Sa susunod na buwan para sa routine maintenance check">
+              </datalist>
             </div>
           </div>
 
@@ -358,12 +434,26 @@
             </div>
             <div id="referral-fields-container" style="display: none; margin-top: 12px;">
               <div class="form-group">
-                <label>Patunguhan (Hospital / Clinic)</label>
-                <input type="text" id="inp-ref-facility" class="inp-field" placeholder="Rural Health Unit (RHU)">
+                <label>Patunguhan (Hospital / Clinic - I-type o pumili)</label>
+                <input type="text" id="inp-ref-facility" class="inp-field" list="list-facilities" placeholder="Rural Health Unit (RHU)">
+                <datalist id="list-facilities">
+                  <option value="Rural Health Unit (RHU)">
+                  <option value="Barangay Health Station (BHS)">
+                  <option value="District Hospital">
+                  <option value="City / Provincial General Hospital">
+                </datalist>
               </div>
               <div class="form-group">
-                <label>Dahilan ng Paglilipat (Clinical Reason)</label>
-                <input type="text" id="inp-ref-reason" class="inp-field" placeholder="e.g. Hypertension evaluation, persistent fever">
+                <label>Dahilan ng Paglilipat (Clinical Reason - I-type o pumili)</label>
+                <input type="text" id="inp-ref-reason" class="inp-field" list="list-ref-reasons" placeholder="e.g. Hypertension evaluation, persistent fever">
+                <datalist id="list-ref-reasons">
+                  <option value="Hypertension evaluation at payo ng doktor sa maintenance">
+                  <option value="Mataas at pabalik-balik na lagnat nang higit 3 araw">
+                  <option value="Matinding pananakit ng tiyan at dehydration">
+                  <option value="Pagsusuri sa malalim na sugat at bakuna laban sa tetanus">
+                  <option value="Prenatal check-up at konsultasyon sa doktor / midwife">
+                  <option value="Panghihina ng katawan at kagyat na pagsusuri">
+                </datalist>
               </div>
             </div>
           </div>
@@ -411,6 +501,42 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- Live Camera Viewfinder Modal -->
+  <div id="modal-camera-capture" class="modal-overlay" style="display: none;">
+    <div class="camera-modal-card">
+      <div class="camera-modal-header">
+        <span class="camera-modal-title">📸 Live Camera Capture</span>
+        <button type="button" class="btn-modal-close" id="btn-close-camera-modal">✕</button>
+      </div>
+      <div class="camera-viewfinder-box">
+        <video id="camera-video-preview" autoplay playsinline muted></video>
+        <canvas id="camera-snapshot-canvas" style="display: none;"></canvas>
+      </div>
+      <div class="camera-modal-controls">
+        <button type="button" class="btn-cam-action" id="btn-camera-switch" title="Palitan ang Camera (Front/Back)">🔄 Harap/Likod</button>
+        <button type="button" class="btn-cam-shutter" id="btn-camera-shutter" title="Kumuha ng Litrato">📸 Kumuha</button>
+        <button type="button" class="btn-cam-action" id="btn-camera-cancel">Isara</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Follow-Up Details Modal -->
+  <div id="modal-followup-details" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">🗓️ Detalye ng Babalikan (Follow-Up Task)</span>
+        <button type="button" class="btn-modal-close" id="btn-close-followup-modal">✕</button>
+      </div>
+      <div class="modal-body" id="followup-modal-content">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btn-modal-close-action">Isara</button>
+        <button type="button" class="btn-primary" id="btn-modal-open-record">✏️ Buksan at I-edit ang Rekord</button>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->

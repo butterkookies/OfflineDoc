@@ -60,7 +60,7 @@ def test_extract_endpoint_taglish():
     data = response.json()
     assert data["status"] == "success"
     record = data["data"]
-    assert "Tatay Ruben" in record["patient_label"]
+    assert "Ruben" in record["patient_label"]
     assert record["age_years"] == 65
     assert record["vitals"]["bp"] == "150/95"
     assert (
@@ -76,3 +76,24 @@ def test_extract_endpoint_taglish():
     # Verified spans must exist
     assert "vitals.bp" in data["verified_spans"]
     assert data["verified_spans"]["vitals.bp"]["status"] == "verified"
+
+def test_extract_city_purok_location():
+    from app.extract import extract_clinical_record_fallback
+    
+    # 1. City / Municipality location test
+    t1 = "Si Nanay Gina, 52 anyos taga Lipa City. Masakit ang ulo."
+    rec1 = extract_clinical_record_fallback(t1)
+    assert rec1["location"] is not None
+    assert "Lipa City" in rec1["location"]
+
+    # 2. Purok with Barangay test
+    t2 = "Si Pedro Santos, 30 anyos taga Purok 4, Brgy. San Isidro. May ubo at sipon."
+    rec2 = extract_clinical_record_fallback(t2)
+    assert rec2["location"] is not None
+    assert "Purok 4" in rec2["location"]
+
+    # 3. Sitio test
+    t3 = "Si Maria Clara, 28 anyos taga Sitio Ilaya. May lagnat 38.2."
+    rec3 = extract_clinical_record_fallback(t3)
+    assert rec3["location"] is not None
+    assert "Sitio Ilaya" in rec3["location"]

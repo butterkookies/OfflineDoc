@@ -210,6 +210,16 @@ async def get_recent_visits():
     """
     return JSONResponse(content={"visits": list_visits()})
 
+@app.get("/api/visits/{visit_id}")
+async def get_single_visit(visit_id: str):
+    """
+    Retrieves full details of a single visit by visit_id for viewing and editing.
+    """
+    record = get_visit(visit_id)
+    if not record:
+        return JSONResponse(status_code=404, content={"error": "Visit record not found."})
+    return JSONResponse(content={"visit": record})
+
 
 
 
