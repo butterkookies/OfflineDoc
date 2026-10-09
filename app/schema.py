@@ -30,6 +30,10 @@ class ClinicalVisitRecord(BaseModel):
     advice_given: List[str] = Field(default_factory=list, description="Self-care advice or lifestyle instructions")
     follow_up: List[FollowUpItem] = Field(default_factory=list, description="Scheduled follow-up checklist items")
     referral: Optional[ReferralInfo] = Field(None, description="Referral details if patient referred to RHU/physician")
+    triage_level: Optional[str] = Field("routine", description="'urgent', 'monitor', or 'routine'")
+    alerts: List[str] = Field(default_factory=list, description="Clinical triage alerts / warning flags")
+    image_attachment: Optional[str] = Field(None, description="Base64 data URI or relative path to clinical photo attachment")
+    image_caption: Optional[str] = Field(None, description="Caption or description of the clinical photo")
     evidence: Dict[str, Optional[str]] = Field(
         default_factory=dict,
         description="Map of field name to exact verbatim Taglish quote from transcript"

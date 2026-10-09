@@ -57,10 +57,10 @@ function Download-FileWithProgress {
     }
 }
 
-# 1. Download Multilingual Whisper Model (~142 MB)
-$whisperModelUrl = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
-$whisperModelPath = Join-Path $ModelsDir "ggml-base.bin"
-Download-FileWithProgress -Url $whisperModelUrl -DestinationPath $whisperModelPath -Description "Whisper Base Multilingual Model (ggml-base.bin)"
+# 1. Download Multilingual Whisper Small Model (~466 MB) - matches config.example.toml
+$whisperModelUrl = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+$whisperModelPath = Join-Path $ModelsDir "ggml-small.bin"
+Download-FileWithProgress -Url $whisperModelUrl -DestinationPath $whisperModelPath -Description "Whisper Small Multilingual Model (ggml-small.bin)"
 
 # 2. Download Qwen2.5 1.5B Instruct Q4_K_M GGUF (~986 MB)
 $qwenModelUrl = "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf"

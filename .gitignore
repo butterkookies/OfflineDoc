@@ -19,3 +19,7 @@ Thumbs.db
 .vscode/
 *.pem
 
+
+# Local archive / test caches
+_archive/
+.pytest_cache/

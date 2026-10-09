@@ -48,6 +48,10 @@ def list_visits() -> List[Dict[str, Any]]:
                 data = json.load(f)
                 vid = data.get("visit_id", p.stem)
                 has_ref = data.get("referral") is not None
+                has_photo = bool(data.get("image_attachment"))
+                triage_level = data.get("triage_level") or ("urgent" if has_ref else "routine")
+                alerts = data.get("alerts") or []
+                pdf_url = f"/api/export/{vid}.pdf"
                 visits.append({
                     "visit_id": vid,
                     "patient_label": data.get("patient_label") or "Hindi pinangalanan",
@@ -56,12 +60,15 @@ def list_visits() -> List[Dict[str, Any]]:
                     "chief_complaint": data.get("chief_complaint") or "",
                     "bp": data.get("vitals", {}).get("bp"),
                     "temp_c": data.get("vitals", {}).get("temp_c"),
+                    "triage_level": triage_level,
+                    "alerts": alerts,
                     "has_referral": has_ref,
                     "referral_facility": data.get("referral", {}).get("facility") if has_ref else None,
+                    "has_photo": has_photo,
                     "follow_up": data.get("follow_up", []),
-                    "visit_pdf": f"/api/export/{vid}_visit.pdf",
-                    "referral_pdf": f"/api/export/{vid}_referral.pdf" if has_ref else None,
-                    "checklist_txt": f"/api/export/{vid}_checklist.txt",
+                    "pdf_url": pdf_url,
+                    "visit_pdf": pdf_url,
+                    "referral_pdf": pdf_url if has_ref else None,
                 })
         except Exception:
             continue

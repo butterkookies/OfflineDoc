@@ -194,6 +194,15 @@
           <button id="btn-re-record" class="btn-text">Ulitin ang Boses</button>
         </div>
 
+        <!-- Dynamic Triage Alert Banner -->
+        <div id="review-triage-alert" class="triage-alert-banner triage-routine">
+          <div class="triage-alert-icon" id="triage-alert-icon">🟢</div>
+          <div class="triage-alert-content">
+            <span class="triage-alert-title" id="triage-alert-title">STATUS: ROUTINE &amp; STABLE</span>
+            <span class="triage-alert-desc" id="triage-alert-desc">Normal ang mga palatandaan (vital signs).</span>
+          </div>
+        </div>
+
         <!-- Transcript Viewer & Editor Box -->
         <div class="transcript-box">
           <div class="box-label">
@@ -295,6 +304,38 @@
             </div>
           </div>
 
+          <!-- Clinical Photo Attachment Card -->
+          <div class="field-card photo-attach-card" id="card-photo-attach">
+            <div class="field-header">
+              <span class="field-title">📸 Litrato ng Pasyente / Kondisyon (Clinical Photo)</span>
+              <span class="badge-optional">OPTIONAL</span>
+            </div>
+            <p class="field-subtext">Maaaring kumuha ng litrato ng pasyente, sugat, pantal, o pakete ng gamot para maisama sa opisyal na PDF report.</p>
+            
+            <div class="photo-actions-row" id="photo-actions-row">
+              <label class="btn-secondary btn-photo">
+                📷 Kumuha ng Litrato (Camera)
+                <input type="file" id="inp-camera-photo" accept="image/*" capture="environment" style="display: none;">
+              </label>
+              <label class="btn-secondary btn-photo">
+                🖼️ Pumili sa Gallery
+                <input type="file" id="inp-gallery-photo" accept="image/*" style="display: none;">
+              </label>
+            </div>
+
+            <!-- Photo Preview Box -->
+            <div id="photo-preview-container" class="photo-preview-container" style="display: none;">
+              <div class="photo-thumbnail-wrapper">
+                <img id="photo-preview-img" class="photo-thumbnail" alt="Clinical Photo Preview">
+                <button type="button" id="btn-remove-photo" class="btn-remove-photo" title="Tanggalin ang litrato">✕</button>
+              </div>
+              <div class="photo-caption-group">
+                <label for="inp-photo-caption">Paglalarawan ng Litrato (Caption)</label>
+                <input type="text" id="inp-photo-caption" class="inp-field" placeholder="Hal. Sugat sa kanang binti / Reseta ng gamot">
+              </div>
+            </div>
+          </div>
+
           <!-- Follow-up Timeframe -->
           <div class="field-card" data-field="follow_up">
             <div class="field-header">
@@ -311,7 +352,7 @@
             <div class="field-header">
               <div class="referral-toggle-row">
                 <input type="checkbox" id="chk-enable-referral" class="custom-toggle">
-                <label for="chk-enable-referral" class="field-title font-bold">🏥 Mag-isyu ng RHU Referral Slip</label>
+                <label for="chk-enable-referral" class="field-title font-bold">🏥 Isama ang RHU Referral Slip sa PDF</label>
               </div>
               <span id="badge-referral" class="badge-routine">ROUTINE</span>
             </div>
@@ -342,43 +383,19 @@
         <div class="export-success-header">
           <div class="success-icon">✓</div>
           <h2>Matagumpay na Naitala!</h2>
-          <p id="export-patient-summary">Nakahanda na ang mga opisyal na dokumento para sa pasyente.</p>
+          <p id="export-patient-summary">Nakahanda na ang opisyal na dokumento para sa pasyente.</p>
         </div>
 
         <div class="export-cards">
-          <!-- Card 1: Visit Summary PDF -->
-          <a id="link-download-visit" href="#" class="export-card-link" target="_blank">
-            <div class="export-card">
+          <!-- Card 1: Unified Clinical Summary & Referral PDF -->
+          <a id="link-download-unified" href="#" class="export-card-link" target="_blank">
+            <div class="export-card unified-doc">
               <div class="doc-icon">📄</div>
               <div class="doc-info">
-                <h4>Patient Visit Summary (PDF)</h4>
-                <p>Opisyal na talaan ng konsultasyon para sa BHW logbook.</p>
+                <h4>Opisyal na Buod at Referral Record (PDF)</h4>
+                <p>Kumpletong talaan ng konsultasyon, vital signs, litrato, at liham ng paglilipat para sa RHU.</p>
               </div>
-              <span class="btn-dl">I-download</span>
-            </div>
-          </a>
-
-          <!-- Card 2: Barangay Referral Slip (Conditional) -->
-          <a id="link-download-referral" href="#" class="export-card-link" target="_blank" style="display: none;">
-            <div class="export-card referral-doc">
-              <div class="doc-icon">🏥</div>
-              <div class="doc-info">
-                <h4>Barangay Referral Slip (PDF)</h4>
-                <p>Liham ng paglilipat para sa doktor sa Rural Health Unit.</p>
-              </div>
-              <span class="btn-dl alert-dl">I-download</span>
-            </div>
-          </a>
-
-          <!-- Card 3: Action Checklist TXT -->
-          <a id="link-download-checklist" href="#" class="export-card-link" target="_blank">
-            <div class="export-card">
-              <div class="doc-icon">📋</div>
-              <div class="doc-info">
-                <h4>Talaan ng Gawain (Checklist TXT)</h4>
-                <p>Follow-up schedule para sa susunod na pagbisita.</p>
-              </div>
-              <span class="btn-dl">I-download</span>
+              <span class="btn-dl">I-download ang PDF</span>
             </div>
           </a>
         </div>

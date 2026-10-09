@@ -11,8 +11,7 @@ from app.validate import validate_wav_file
 from app.transcribe import transcribe_audio
 from app.extract import extract_clinical_record
 from app.storage import save_visit, get_visit, list_visits
-from app.checklist import generate_checklist_text
-from app.export_pdf import generate_visit_pdf, generate_referral_pdf
+from app.export_pdf import generate_unified_report_pdf, generate_visit_pdf, generate_referral_pdf
 from pydantic import BaseModel
 from typing import Dict, Any
 
@@ -155,39 +154,37 @@ async def extract_endpoint(req: ExtractRequest):
 async def confirm_endpoint(req: ConfirmRequest):
     """
     Saves the health-worker reviewed clinical visit record, generates:
-    1. Visit Summary PDF
-    2. Barangay Referral Slip PDF (if referral is indicated)
-    3. Action Checklist text file
+    1. Unified Patient Clinical Summary & Referral Record PDF (DOH Form 1 / Konsulta format)
+       including embedded clinical photo (if attached) and triage alert status.
     """
     try:
         visit_data = dict(req.record)
         visit_data["transcript"] = req.transcript
         visit_id = save_visit(visit_data)
 
-        # Generate outputs
-        visit_pdf_path = config.storage.exports_dir / f"{visit_id}_visit.pdf"
-        generate_visit_pdf(visit_data, visit_pdf_path)
+        # Generate Unified PDF (Summary + Referral + Photo)
+        unified_pdf_path = config.storage.exports_dir / f"{visit_id}.pdf"
+        generate_unified_report_pdf(visit_data, unified_pdf_path)
 
-        referral_pdf_url = None
-        if visit_data.get("referral"):
-            ref_pdf_path = config.storage.exports_dir / f"{visit_id}_referral.pdf"
-            generate_referral_pdf(visit_data, ref_pdf_path)
-            referral_pdf_url = f"/api/export/{visit_id}_referral.pdf"
+        # Also create named alias for backward compatibility
+        legacy_visit_pdf = config.storage.exports_dir / f"{visit_id}_visit.pdf"
+        if not legacy_visit_pdf.exists():
+            try:
+                import shutil
+                shutil.copyfile(unified_pdf_path, legacy_visit_pdf)
+            except Exception:
+                pass
 
-        # Generate checklist
-        checklist_txt = generate_checklist_text(visit_data)
-        checklist_path = config.storage.exports_dir / f"{visit_id}_checklist.txt"
-        with open(checklist_path, "w", encoding="utf-8") as f:
-            f.write(checklist_txt)
+        pdf_url = f"/api/export/{visit_id}.pdf"
 
         return JSONResponse(
             content={
                 "status": "confirmed",
                 "visit_id": visit_id,
                 "exports": {
-                    "visit_pdf": f"/api/export/{visit_id}_visit.pdf",
-                    "referral_pdf": referral_pdf_url,
-                    "checklist_txt": f"/api/export/{visit_id}_checklist.txt",
+                    "pdf_url": pdf_url,
+                    "visit_pdf": pdf_url,
+                    "referral_pdf": pdf_url if visit_data.get("referral") else None,
                 },
             }
         )

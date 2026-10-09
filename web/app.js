@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentRecord = null;
   let currentSpans = {};
   let isSampleMode = false;
+  let currentPhotoDataUrl = null;
 
   // --- DOM Elements ---
   // Header & Nav
@@ -52,6 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Review Screen Elements
   const btnReRecord = document.getElementById("btn-re-record");
+  const reviewTriageAlert = document.getElementById("review-triage-alert");
+  const triageAlertIcon = document.getElementById("triage-alert-icon");
+  const triageAlertTitle = document.getElementById("triage-alert-title");
+  const triageAlertDesc = document.getElementById("triage-alert-desc");
   const transcriptDisplay = document.getElementById("transcript-display");
   const transcribeTimeBadge = document.getElementById("transcribe-time-badge");
   const btnEditTranscript = document.getElementById("btn-edit-transcript");
@@ -74,6 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const inpAdvice = document.getElementById("inp-advice");
   const inpFollowUp = document.getElementById("inp-follow-up");
 
+  // Clinical Photo Attachment Elements
+  const inpCameraPhoto = document.getElementById("inp-camera-photo");
+  const inpGalleryPhoto = document.getElementById("inp-gallery-photo");
+  const photoPreviewContainer = document.getElementById("photo-preview-container");
+  const photoPreviewImg = document.getElementById("photo-preview-img");
+  const btnRemovePhoto = document.getElementById("btn-remove-photo");
+  const inpPhotoCaption = document.getElementById("inp-photo-caption");
+
   // Referral Card & Toggle
   const cardReferral = document.getElementById("card-referral");
   const chkEnableReferral = document.getElementById("chk-enable-referral");
@@ -93,9 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Export Screen Elements
   const exportPatientSummary = document.getElementById("export-patient-summary");
-  const linkDownloadVisit = document.getElementById("link-download-visit");
-  const linkDownloadReferral = document.getElementById("link-download-referral");
-  const linkDownloadChecklist = document.getElementById("link-download-checklist");
+  const linkDownloadUnified = document.getElementById("link-download-unified");
   const btnViewLogbook = document.getElementById("btn-view-logbook");
   const btnNewVisit = document.getElementById("btn-new-visit");
 
@@ -212,8 +223,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
 
-          // Vitals tags
+          // Vitals & Triage tags
           let vitalsHtml = "";
+          
+          // Triage status tag
+          const tLevel = v.triage_level || (v.has_referral ? "urgent" : "routine");
+          if (tLevel === "urgent") {
+            vitalsHtml += `<span class="vital-tag triage-tag-urgent">🔴 URGENT</span>`;
+          } else if (tLevel === "monitor") {
+            vitalsHtml += `<span class="vital-tag triage-tag-monitor">🟡 MONITOR</span>`;
+          } else {
+            vitalsHtml += `<span class="vital-tag triage-tag-routine">🟢 STABLE</span>`;
+          }
+
           if (v.bp) {
             const isBpHigh = isHighBp(v.bp);
             vitalsHtml += `<span class="vital-tag ${isBpHigh ? "vital-tag-warn" : ""}">BP: ${escapeHtml(v.bp)}</span>`;
@@ -222,9 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const isFever = v.temp_c >= 38.0;
             vitalsHtml += `<span class="vital-tag ${isFever ? "vital-tag-warn" : ""}">T: ${v.temp_c}°C</span>`;
           }
-          if (v.has_referral) {
-            vitalsHtml += `<span class="ref-tag">RHU REFERRAL</span>`;
+          if (v.has_photo) {
+            vitalsHtml += `<span class="vital-tag" style="background:rgba(56,189,248,0.18);color:#38bdf8;border:1px solid rgba(56,189,248,0.4);">📸 Litrato</span>`;
           }
+
+          const pdfLink = v.pdf_url || v.visit_pdf;
 
           card.innerHTML = `
             <div class="visit-card-header">
@@ -237,9 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ${vitalsHtml ? `<div class="visit-meta-row">${vitalsHtml}</div>` : ""}
             ${v.chief_complaint ? `<div class="visit-complaint-preview">"${escapeHtml(v.chief_complaint)}"</div>` : ""}
             <div class="visit-actions-row">
-              <a href="${v.visit_pdf}" target="_blank" class="btn-visit-dl">📄 Summary PDF</a>
-              ${v.has_referral ? `<a href="${v.referral_pdf}" target="_blank" class="btn-visit-dl ref-dl">🏥 Referral Slip</a>` : ""}
-              <a href="${v.checklist_txt}" target="_blank" class="btn-visit-dl" style="color:#94a3b8;">📋 Checklist</a>
+              <a href="${pdfLink}" target="_blank" class="btn-visit-dl" style="width:100%;text-align:center;">📄 Buksan ang Opisyal na PDF</a>
             </div>
           `;
           visitsList.appendChild(card);
@@ -477,8 +499,144 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // --- Clinical Photo Capture & Compression ---
+  function handlePhotoFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxDim = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > h && w > maxDim) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else if (h > maxDim) {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        currentPhotoDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        if (photoPreviewImg) photoPreviewImg.src = currentPhotoDataUrl;
+        if (photoPreviewContainer) photoPreviewContainer.style.display = "flex";
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (inpCameraPhoto) {
+    inpCameraPhoto.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) handlePhotoFile(e.target.files[0]);
+    });
+  }
+  if (inpGalleryPhoto) {
+    inpGalleryPhoto.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) handlePhotoFile(e.target.files[0]);
+    });
+  }
+  if (btnRemovePhoto) {
+    btnRemovePhoto.addEventListener("click", () => {
+      currentPhotoDataUrl = null;
+      if (photoPreviewImg) photoPreviewImg.src = "";
+      if (photoPreviewContainer) photoPreviewContainer.style.display = "none";
+      if (inpPhotoCaption) inpPhotoCaption.value = "";
+      if (inpCameraPhoto) inpCameraPhoto.value = "";
+      if (inpGalleryPhoto) inpGalleryPhoto.value = "";
+    });
+  }
+
+  // --- Dynamic Triage Calculation & Notifications ---
+  function calculateTriageStatus() {
+    const bp = inpBp ? inpBp.value.trim() : "";
+    const temp = inpTemp ? parseFloat(inpTemp.value) : NaN;
+    const isRef = chkEnableReferral ? chkEnableReferral.checked : false;
+    const alerts = [];
+    let level = "routine";
+
+    if (bp && bp.includes("/")) {
+      const parts = bp.split("/");
+      const sys = parseInt(parts[0], 10);
+      const dia = parseInt(parts[1], 10);
+      if (sys >= 180 || dia >= 120) {
+        alerts.push(`Kritikal na BP (${bp}) - Hypertensive Urgency`);
+        level = "urgent";
+      } else if (sys >= 140 || dia >= 90) {
+        alerts.push(`Mataas na BP (${bp}) - Stage 1/2 Hypertension`);
+        if (level !== "urgent") level = isRef ? "urgent" : "monitor";
+      } else if (sys >= 130 || dia >= 85) {
+        alerts.push(`Elevated BP (${bp})`);
+        if (level === "routine") level = "monitor";
+      }
+    }
+
+    if (!isNaN(temp)) {
+      if (temp >= 39.0) {
+        alerts.push(`Mataas na Lagnat (${temp}°C)`);
+        level = "urgent";
+      } else if (temp >= 38.0) {
+        alerts.push(`May Lagnat (${temp}°C)`);
+        if (level === "routine") level = "monitor";
+      }
+    }
+
+    if (isRef) {
+      alerts.push("Isasama ang RHU Referral Slip");
+      if (level === "routine") level = "monitor";
+    }
+
+    return { level, alerts };
+  }
+
+  function updateTriageStatusAlert() {
+    if (!reviewTriageAlert) return;
+    const { level, alerts } = calculateTriageStatus();
+
+    reviewTriageAlert.classList.remove("triage-urgent", "triage-monitor", "triage-routine");
+
+    if (level === "urgent") {
+      reviewTriageAlert.classList.add("triage-urgent");
+      if (triageAlertIcon) triageAlertIcon.textContent = "🔴";
+      if (triageAlertTitle) triageAlertTitle.textContent = "KAGYAT NA AKSYON / URGENT REFERRAL";
+      if (triageAlertDesc) {
+        triageAlertDesc.textContent = alerts.length
+          ? alerts.join(" · ")
+          : "May kritikal na palatandaan na nangangailangan ng agarang atensyon ng doktor sa RHU.";
+      }
+    } else if (level === "monitor") {
+      reviewTriageAlert.classList.add("triage-monitor");
+      if (triageAlertIcon) triageAlertIcon.textContent = "🟡";
+      if (triageAlertTitle) triageAlertTitle.textContent = "BANTAYAN / MONITOR & SCHEDULE FOLLOW-UP";
+      if (triageAlertDesc) {
+        triageAlertDesc.textContent = alerts.length
+          ? alerts.join(" · ")
+          : "Bantayan ang mga sintomas at sundin ang plano sa pagbalik.";
+      }
+    } else {
+      reviewTriageAlert.classList.add("triage-routine");
+      if (triageAlertIcon) triageAlertIcon.textContent = "🟢";
+      if (triageAlertTitle) triageAlertTitle.textContent = "MAAYOS / ROUTINE & STABLE";
+      if (triageAlertDesc) {
+        triageAlertDesc.textContent = "Normal ang mga vital signs at walang kagyat na panganib.";
+      }
+    }
+  }
+
   // --- Populate Review Screen & Setup Grounding ---
   function populateReviewScreen(transcript, record, spans) {
+    // Reset photo
+    currentPhotoDataUrl = null;
+    if (photoPreviewImg) photoPreviewImg.src = "";
+    if (photoPreviewContainer) photoPreviewContainer.style.display = "none";
+    if (inpPhotoCaption) inpPhotoCaption.value = "";
+    if (inpCameraPhoto) inpCameraPhoto.value = "";
+    if (inpGalleryPhoto) inpGalleryPhoto.value = "";
+
     // Fill fields
     inpPatientLabel.value = record.patient_label || "";
     inpAge.value = record.age_years !== null ? record.age_years : "";
@@ -538,10 +696,12 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         referralFieldsContainer.style.display = "none";
       }
+      updateTriageStatusAlert();
     };
 
-    // Vitals warning checks
+    // Vitals warning checks & Triage Banner update
     checkVitalsWarnings();
+    updateTriageStatusAlert();
 
     // Field verified badges
     updateVerifiedIndicators(spans);
@@ -568,10 +728,13 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       vitalTempCard.classList.remove("warning");
     }
+
+    updateTriageStatusAlert();
   }
 
   inpBp.addEventListener("input", checkVitalsWarnings);
   inpTemp.addEventListener("input", checkVitalsWarnings);
+  inpComplaint.addEventListener("input", updateTriageStatusAlert);
 
   // --- Verified Indicators ---
   function updateVerifiedIndicators(spans) {
@@ -745,6 +908,9 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       }
 
+      // Calculate Triage Level & Alerts
+      const { level: triageLevel, alerts: triageAlerts } = calculateTriageStatus();
+
       const confirmedRecord = {
         patient_label: inpPatientLabel.value.trim() || "Hindi pinangalanan",
         visit_date: new Date().toISOString().split("T")[0],
@@ -764,6 +930,10 @@ document.addEventListener("DOMContentLoaded", () => {
         advice_given: adviceList,
         follow_up: followUpList,
         referral: referralObj,
+        triage_level: triageLevel,
+        alerts: triageAlerts,
+        image_attachment: currentPhotoDataUrl || null,
+        image_caption: inpPhotoCaption && inpPhotoCaption.value.trim() ? inpPhotoCaption.value.trim() : null,
         evidence: (currentRecord && currentRecord.evidence) || {},
       };
 
@@ -783,16 +953,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const confData = await resp.json();
 
-      // Setup Export Links
-      exportPatientSummary.textContent = `Nakahanda na ang mga opisyal na dokumento para kay ${confirmedRecord.patient_label}.`;
-      linkDownloadVisit.href = confData.exports.visit_pdf;
-      linkDownloadChecklist.href = confData.exports.checklist_txt;
-
-      if (confData.exports.referral_pdf) {
-        linkDownloadReferral.href = confData.exports.referral_pdf;
-        linkDownloadReferral.style.display = "block";
-      } else {
-        linkDownloadReferral.style.display = "none";
+      // Setup Export Links (Unified PDF)
+      exportPatientSummary.textContent = `Nakahanda na ang opisyal na dokumento para kay ${confirmedRecord.patient_label}.`;
+      const finalPdfUrl = confData.exports.pdf_url || confData.exports.visit_pdf;
+      if (linkDownloadUnified) {
+        linkDownloadUnified.href = finalPdfUrl;
       }
 
       showScreen("export");
@@ -813,6 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentTranscript = "";
     currentRecord = null;
     currentSpans = {};
+    currentPhotoDataUrl = null;
     setSampleBanner(false);
     showScreen("record");
   });

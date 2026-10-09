@@ -1534,3 +1534,197 @@ body {
   margin: 0;
 }
 
+/* ==========================================================================
+   TRIAGE ALERTS & NOTIFICATIONS
+   ========================================================================== */
+.triage-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.triage-alert-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.triage-alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.triage-alert-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.triage-alert-desc {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.triage-urgent {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+.triage-urgent .triage-alert-title {
+  color: #ef4444;
+}
+
+.triage-monitor {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+}
+.triage-monitor .triage-alert-title {
+  color: #f59e0b;
+}
+
+.triage-routine {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+}
+.triage-routine .triage-alert-title {
+  color: #10b981;
+}
+
+/* ==========================================================================
+   CLINICAL PHOTO ATTACHMENT CARD
+   ========================================================================== */
+.photo-attach-card {
+  border-left: 4px solid #38bdf8;
+  background: linear-gradient(145deg, rgba(20, 30, 48, 0.8) 0%, rgba(15, 23, 42, 0.75) 100%);
+}
+
+.badge-optional {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.photo-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-photo {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px dashed rgba(56, 189, 248, 0.4);
+  border-radius: var(--radius-sm);
+  color: #38bdf8;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-photo:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+}
+
+.photo-preview-container {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photo-thumbnail-wrapper {
+  position: relative;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.photo-thumbnail {
+  max-width: 140px;
+  max-height: 100px;
+  border-radius: 6px;
+  border: 2px solid rgba(56, 189, 248, 0.5);
+  object-fit: cover;
+  display: block;
+}
+
+.btn-remove-photo {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.photo-caption-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.photo-caption-group label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   UNIFIED EXPORT CARD
+   ========================================================================== */
+.unified-doc {
+  border-left: 4px solid #0ea5e9;
+  background: linear-gradient(145deg, rgba(14, 165, 233, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%);
+}
+
+.triage-tag-urgent {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.triage-tag-monitor {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.triage-tag-routine {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+

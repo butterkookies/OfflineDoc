@@ -1,10 +1,17 @@
 import os
 import pytest
+import io
+import base64
 from pathlib import Path
+from PIL import Image
 
 from app.storage import save_visit, get_visit
-from app.checklist import generate_checklist_text
-from app.export_pdf import generate_visit_pdf, generate_referral_pdf
+from app.export_pdf import generate_unified_report_pdf, compute_triage_alerts
+
+# Create a small sample image base64 data URI for testing photo attachments
+buf = io.BytesIO()
+Image.new("RGB", (100, 100), color="crimson").save(buf, format="JPEG")
+SAMPLE_PHOTO_DATA_URI = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
 
 SAMPLE_VISIT = {
     "patient_label": "Tatay Ruben Dela Peña", # Contains 'ñ' to stress-test Unicode!
@@ -16,7 +23,7 @@ SAMPLE_VISIT = {
     "symptoms": ["Dizziness", "Neck pain", "Headache"],
     "vitals": {
         "bp": "150/95",
-        "temp_c": 37.1,
+        "temp_c": 38.5,
         "pulse_bpm": 82,
         "resp_rate": 18,
         "weight_kg": 68.0,
@@ -31,6 +38,10 @@ SAMPLE_VISIT = {
         "reason": "Stage 1 Hypertension triage and maintenance review",
         "urgency": "urgent"
     },
+    "triage_level": "urgent",
+    "alerts": ["MATAAS NA BP (150/95): Stage 1/2 Hypertension", "MAY LAGNAT (38.5°C): Moderate fever"],
+    "image_attachment": SAMPLE_PHOTO_DATA_URI,
+    "image_caption": "Sugat sa kanang binti (Clinical Photo)",
     "evidence": {
         "vitals.bp": "BP niya kanina 150 over 95",
         "chief_complaint": "Masakit daw ang batok at nahihilo"
@@ -45,38 +56,42 @@ def test_storage_save_and_retrieve():
     assert loaded is not None
     assert loaded["patient_label"] == "Tatay Ruben Dela Peña"
     assert loaded["vitals"]["bp"] == "150/95"
+    assert loaded["image_caption"] == "Sugat sa kanang binti (Clinical Photo)"
 
-def test_checklist_generation():
-    checklist_txt = generate_checklist_text(SAMPLE_VISIT)
-    assert "TALAAN NG GAWAIN" in checklist_txt
-    assert "Tatay Ruben" in checklist_txt
-    assert "Home visit blood pressure re-check" in checklist_txt
-    assert "Rural Health Unit" in checklist_txt
+def test_compute_triage_alerts():
+    level, alerts = compute_triage_alerts(SAMPLE_VISIT)
+    assert level == "urgent"
+    assert any("BP" in a for a in alerts)
+    assert any("LAGNAT" in a for a in alerts)
 
-def test_generate_visit_pdf(tmp_path):
-    pdf_path = tmp_path / "visit_summary.pdf"
-    res_path = generate_visit_pdf(SAMPLE_VISIT, pdf_path)
+    # Routine case
+    routine_visit = {
+        "vitals": {"bp": "110/70", "temp_c": 36.8},
+        "referral": None
+    }
+    r_level, r_alerts = compute_triage_alerts(routine_visit)
+    assert r_level == "routine"
+
+def test_generate_unified_pdf_with_photo_and_referral(tmp_path):
+    pdf_path = tmp_path / "unified_summary_referral.pdf"
+    res_path = generate_unified_report_pdf(SAMPLE_VISIT, pdf_path)
     assert res_path.exists()
-    assert res_path.stat().st_size > 1000 # Valid non-empty PDF
+    assert res_path.stat().st_size > 2000 # Valid non-empty PDF with image
     with open(res_path, "rb") as f:
         header = f.read(4)
         assert header == b"%PDF"
 
-def test_generate_referral_pdf(tmp_path):
-    ref_pdf_path = tmp_path / "referral_slip.pdf"
-    res_path = generate_referral_pdf(SAMPLE_VISIT, ref_pdf_path)
-    assert res_path is not None
+def test_generate_unified_pdf_without_referral_or_photo(tmp_path):
+    no_ref_visit = dict(SAMPLE_VISIT)
+    no_ref_visit["referral"] = None
+    no_ref_visit["image_attachment"] = None
+    pdf_path = tmp_path / "unified_no_ref.pdf"
+    res_path = generate_unified_report_pdf(no_ref_visit, pdf_path)
     assert res_path.exists()
     assert res_path.stat().st_size > 1000
     with open(res_path, "rb") as f:
         header = f.read(4)
         assert header == b"%PDF"
-
-def test_generate_referral_pdf_none_when_no_referral(tmp_path):
-    no_ref_visit = dict(SAMPLE_VISIT)
-    no_ref_visit["referral"] = None
-    res = generate_referral_pdf(no_ref_visit, tmp_path / "no_ref.pdf")
-    assert res is None
 
 def test_api_confirm_and_export():
     from fastapi.testclient import TestClient
@@ -92,25 +107,22 @@ def test_api_confirm_and_export():
     data = resp.json()
     assert data["status"] == "confirmed"
     assert "visit_id" in data
-    assert data["exports"]["visit_pdf"] is not None
-    assert data["exports"]["referral_pdf"] is not None
-    assert data["exports"]["checklist_txt"] is not None
+    assert data["exports"]["pdf_url"] is not None
 
-    # Test downloading the generated PDF
-    pdf_url = data["exports"]["visit_pdf"]
+    # Test downloading the generated unified PDF
+    pdf_url = data["exports"]["pdf_url"]
     pdf_resp = client.get(pdf_url)
     assert pdf_resp.status_code == 200
     assert pdf_resp.headers["content-type"] == "application/pdf"
     assert pdf_resp.content.startswith(b"%PDF")
 
-    # Test downloading checklist
-    chk_url = data["exports"]["checklist_txt"]
-    chk_resp = client.get(chk_url)
-    assert chk_resp.status_code == 200
-    assert "TALAAN NG GAWAIN" in chk_resp.text
-
     # Test visits list
     visits_resp = client.get("/api/visits")
     assert visits_resp.status_code == 200
-    assert len(visits_resp.json()["visits"]) > 0
+    visits_data = visits_resp.json()["visits"]
+    assert len(visits_data) > 0
+    latest = visits_data[0]
+    assert "triage_level" in latest
+    assert "pdf_url" in latest
+
 

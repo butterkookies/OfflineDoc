@@ -42,9 +42,12 @@ Stop-PortProcess -Port 8000
 Stop-PortProcess -Port 8081
 
 # 2. Check local models
-$whisperModel = Join-Path $ModelsDir "ggml-base.bin"
+$whisperModel = Join-Path $ModelsDir "ggml-small.bin"
+if (-not (Test-Path $whisperModel)) { $whisperModel = Join-Path $ModelsDir "ggml-base.bin" }
 $qwenModel = Join-Path $ModelsDir "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
-$llamaExe = Join-Path $BinDir "llama-server.exe"
+# llama.cpp lives in bin\llama\ because its ggml*.dll builds conflict with whisper.cpp's
+$llamaExe = Join-Path $BinDir "llama\llama-server.exe"
+if (-not (Test-Path $llamaExe)) { $llamaExe = Join-Path $BinDir "llama-server.exe" }
 
 if (-not (Test-Path $whisperModel)) {
     Write-Host " [WARNING] Whisper model missing at '$whisperModel'." -ForegroundColor Yellow
