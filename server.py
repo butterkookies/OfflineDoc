@@ -393,6 +393,8 @@ async def transcribe_audio(file: UploadFile = File(...)):
             "audio_size_bytes": len(content)
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Transcription error: {str(e)}")
     finally:
         if os.path.exists(tmp_path):

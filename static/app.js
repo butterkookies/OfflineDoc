@@ -580,6 +580,8 @@ async function runTranscription() {
   try {
     const res = await fetch("/api/transcribe", { method: "POST", body: formData });
     const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || `Server returned HTTP ${res.status}`);
+    if (!data.transcript) throw new Error("No speech detected in the recording. Please record again, closer to the mic.");
     
     document.getElementById("transcriptDisplay").innerText = `"${data.transcript}"`;
     document.getElementById("sttStats").innerText = `STT Latency: ${data.duration_seconds}s (CTranslate2 INT8)`;
@@ -611,6 +613,7 @@ async function runExtractionDirect(transcript) {
       body: JSON.stringify({ transcript, patient_id: pId })
     });
     const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || `Server returned HTTP ${res.status}`);
     currentEncounterData = data;
 
     const ext = data.extracted_data;

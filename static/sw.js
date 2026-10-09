@@ -1,5 +1,5 @@
 // static/sw.js - OfflineDoc Service Worker for 100% Air-Gapped PWA Execution
-const CACHE_NAME = "offlinedoc-pwa-v1.2";
+const CACHE_NAME = "offlinedoc-pwa-v1.3";
 const APP_SHELL = [
   "/",
   "/index.html",
