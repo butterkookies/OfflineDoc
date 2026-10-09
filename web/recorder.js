@@ -32,9 +32,11 @@ class WavAudioRecorder {
       },
     });
 
-    // 2. Initialize AudioContext at 16,000 Hz for whisper native intake
+    // 2. Use the device's NATIVE sample rate (iOS Safari distorts audio when a
+    //    16 kHz context is forced on a 48 kHz mic). We downsample in stop().
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    this.audioContext = new AudioContextClass({ sampleRate: 16000 });
+    this.audioContext = new AudioContextClass();
+    this.inputSampleRate = this.audioContext.sampleRate;
     if (this.audioContext.state === "suspended") {
       await this.audioContext.resume();
     }
@@ -106,14 +108,43 @@ class WavAudioRecorder {
       offset += buf.length;
     }
 
-    // Encode to 16-bit Mono 16 kHz WAV
-    const wavBlob = this.encodeWAV(mergedSamples, 16000);
+    // Downsample native rate -> 16 kHz, then encode 16-bit Mono WAV
+    const resampled = this.downsample(mergedSamples, this.inputSampleRate || 16000, 16000);
+    const wavBlob = this.encodeWAV(resampled, 16000);
 
     return {
       blob: wavBlob,
       durationSeconds: durationSeconds,
       sampleCount: this.totalSamples,
     };
+  }
+
+  /** Box-filter (averaging) downsampler: acts as a simple anti-alias low-pass. */
+  downsample(samples, fromRate, toRate) {
+    if (fromRate === toRate) return samples;
+    const ratio = fromRate / toRate;
+    const outLength = Math.floor(samples.length / ratio);
+    const out = new Float32Array(outLength);
+    let pos = 0;
+    for (let i = 0; i < outLength; i++) {
+      const end = Math.min(samples.length, Math.round((i + 1) * ratio));
+      let sum = 0;
+      let count = 0;
+      for (let j = pos; j < end; j++) {
+        sum += samples[j];
+        count++;
+      }
+      out[i] = count ? sum / count : 0;
+      pos = end;
+    }
+    // Peak-normalize quiet phone recordings to ~0.9 so Whisper hears clearly
+    let peak = 0;
+    for (let i = 0; i < out.length; i++) peak = Math.max(peak, Math.abs(out[i]));
+    if (peak > 0.01 && peak < 0.9) {
+      const gain = 0.9 / peak;
+      for (let i = 0; i < out.length; i++) out[i] *= gain;
+    }
+    return out;
   }
 
   encodeWAV(samples, sampleRate) {

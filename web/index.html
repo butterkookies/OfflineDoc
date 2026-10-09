@@ -12,18 +12,31 @@
   <div class="app-container">
     <!-- Top Header -->
     <header class="app-header">
-      <div class="brand">
+      <div class="brand" id="nav-brand">
         <span class="logo-icon">🩺</span>
         <div class="brand-text">
           <span class="logo-text">OfflineDoc</span>
           <span class="logo-sub">Barangay Health Assistant</span>
         </div>
       </div>
-      <div class="offline-badge" id="offline-badge" title="Running 100% on this device in Airplane Mode">
-        <span class="badge-dot"></span>
-        <span class="badge-text">AIRPLANE MODE · LOCAL AI</span>
+      <div class="header-nav">
+        <button id="nav-btn-home" class="nav-tab-btn active" title="Talaan ng Pagbisita">
+          📋 Talaan
+        </button>
+        <button id="nav-btn-record" class="nav-tab-btn" title="Magtala ng Bagong Pagbisita">
+          🎙️ Magtala
+        </button>
       </div>
     </header>
+
+    <!-- Sub-header Offline Status Bar -->
+    <div class="status-subbar">
+      <div class="offline-badge" id="offline-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">AIRPLANE MODE · 100% LOCAL AI</span>
+      </div>
+      <div class="location-tag">BARANGAY HEALTH STATION</div>
+    </div>
 
     <!-- Sample / Fallback Notice Banner -->
     <div id="sample-banner" class="sample-banner" style="display: none;">
@@ -33,14 +46,97 @@
     <!-- Main Screens Container -->
     <main class="content-view">
       
-      <!-- SCREEN 1: RECORD -->
-      <section id="view-record" class="view-screen active">
-        <div class="hero-card">
-          <div class="station-tag">BARANGAY HEALTH STATION</div>
-          <h2>Pagtatala ng Pagbisita</h2>
-          <p>Ikuwento ang buod ng pasyente gamit ang Taglish o Filipino. Awtomatikong bubuuin ng Local AI ang talaan at referral slip.</p>
+      <!-- SCREEN 0: HOME / LOGBOOK VIEW -->
+      <section id="view-home" class="view-screen active">
+        <!-- Daily Statistics Counters -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-number" id="stat-total-visits">0</span>
+            <span class="stat-label">Naitalang Pagbisita</span>
+          </div>
+          <div class="stat-card stat-alert">
+            <span class="stat-number" id="stat-total-referrals">0</span>
+            <span class="stat-label">RHU Referral</span>
+          </div>
+          <div class="stat-card stat-followup">
+            <span class="stat-number" id="stat-total-followups">0</span>
+            <span class="stat-label">Babalikan</span>
+          </div>
         </div>
 
+        <!-- Big Hero CTA to Start Dictation -->
+        <div class="hero-cta-card">
+          <div class="hero-cta-content">
+            <h3>Bago ang Pagbisita?</h3>
+            <p>Ikuwento ang buod sa Taglish sa loob ng 20–30 segundo para sa opisyal na talaan at referral slip.</p>
+          </div>
+          <button id="btn-home-start-record" class="btn-primary btn-cta">
+            🎙️ + Magtala ng Pagbisita
+          </button>
+        </div>
+
+        <!-- Section: Follow-Up Tasks (Mga Babalikan) -->
+        <div class="logbook-section" id="section-followups" style="display: none;">
+          <div class="section-title-row">
+            <h4>🗓️ Mga Babalikan (Follow-Up Tasks)</h4>
+            <span class="badge-count" id="badge-followup-count">0</span>
+          </div>
+          <div id="followup-list" class="followup-list">
+            <!-- Dynamic follow-up items -->
+          </div>
+        </div>
+
+        <!-- Section: Recent Visits Logbook -->
+        <div class="logbook-section">
+          <div class="section-title-row">
+            <h4>📋 Kamakailang Talaan sa Barangay</h4>
+            <span class="badge-count" id="badge-visits-count">0</span>
+          </div>
+          <div id="visits-list" class="visits-list">
+            <div class="empty-state" id="empty-visits-state">
+              <span class="empty-icon">📁</span>
+              <p>Wala pang naitatalang pagbisita ngayong araw.</p>
+              <small>I-tap ang "+ Magtala ng Pagbisita" sa itaas para magsimula.</small>
+            </div>
+            <!-- Dynamic visit cards injected here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 1: RECORD -->
+      <section id="view-record" class="view-screen">
+        <div class="hero-card">
+          <div class="station-tag">VOICE CLINICAL DICTATION</div>
+          <h2>Pagtatala ng Pagbisita</h2>
+          <p>Magsalita sa Taglish o Filipino. Awtomatikong bubuuin ng Local AI ang talaan, checklist, at referral slip.</p>
+        </div>
+
+        <!-- Case Presets Chips -->
+        <div class="presets-section">
+          <span class="presets-label">PUMILI NG KASO PARA SA TELEPROMPTER GABAY:</span>
+          <div class="presets-chips">
+            <button type="button" class="preset-chip active" data-preset="hypertension">🩺 Hypertension (Mataas na BP)</button>
+            <button type="button" class="preset-chip" data-preset="fever">🌡️ Lagnat / Trangkaso</button>
+            <button type="button" class="preset-chip" data-preset="cough">🫁 Ubo at Sipon</button>
+            <button type="button" class="preset-chip" data-preset="general">🏠 Regular na Pagbisita</button>
+          </div>
+        </div>
+
+        <!-- Teleprompter / Punan-ang-Puwang Card -->
+        <div class="teleprompter-card">
+          <div class="teleprompter-header">
+            <span class="teleprompter-icon">🗣️</span>
+            <span class="teleprompter-title">TELEPROMPTER: BASAHIN HABANG NAGRE-RECORD</span>
+          </div>
+          <div class="teleprompter-instruction">
+            I-palit lamang ang mga may kulay na salita sa totoong detalye ng pasyente:
+          </div>
+          <div class="teleprompter-text" id="teleprompter-text">
+            "Si <span class="slot slot-patient">[Pangalan]</span>, <span class="slot slot-age">[Edad] anyos</span>, taga <span class="slot slot-loc">[Sitio o Purok]</span>. Masakit ang batok at nahihilo. Ang BP niya <span class="slot slot-bp">[150 over 95]</span>, may temperatura na <span class="slot slot-temp">[37.8]</span>. Binigyan ko ng <span class="slot slot-meds">[paracetamol]</span> at pinagpahinga. Sinabihan ko na magpunta sa <span class="slot slot-plan">[RHU bukas]</span>. Babalikan ko sa <span class="slot slot-plan">[Biyernes]</span>."
+          </div>
+        </div>
+
+        <!-- Main Voice Recorder Card -->
         <div class="recorder-card">
           <div class="timer-display" id="record-timer">00:00</div>
           
@@ -57,6 +153,12 @@
 
           <div class="audio-level-container">
             <div class="audio-level-bar" id="audio-level-bar"></div>
+          </div>
+
+          <!-- Reassurance Note (Anti-Anxiety) -->
+          <div class="reassurance-note">
+            <span class="shield-icon">🛡️</span>
+            <p><strong>Walang Pressure:</strong> Huwag mag-alala kung may makalimutan o magkamali ng salita. May pagkakataon kang mag-edit o magdagdag bago i-save ang rekord.</p>
           </div>
         </div>
 
@@ -87,18 +189,32 @@
         <div class="review-header">
           <div>
             <h3>Suriin ang Talaan</h3>
-            <span class="review-sub">I-tap ang kahit anong detalye para makita ang patunay sa boses.</span>
+            <span class="review-sub">Maaaring iwasto ang salaysay o ang mga kahon bago i-save.</span>
           </div>
-          <button id="btn-re-record" class="btn-text">Ulitin</button>
+          <button id="btn-re-record" class="btn-text">Ulitin ang Boses</button>
         </div>
 
-        <!-- Transcript Viewer Box with Highlight Spans -->
+        <!-- Transcript Viewer & Editor Box -->
         <div class="transcript-box">
           <div class="box-label">
             <span>🗣️ ORIHINAL NA SALAYSAY (TRANSCRIPT)</span>
-            <span id="transcribe-time-badge" class="time-badge">0.0s</span>
+            <div class="transcript-actions">
+              <span id="transcribe-time-badge" class="time-badge">0.0s</span>
+              <button id="btn-edit-transcript" class="btn-sm-action">✏️ I-edit ang Teksto</button>
+            </div>
           </div>
+          
+          <!-- View mode with two-way clickable spans -->
           <div id="transcript-display" class="transcript-content"></div>
+
+          <!-- Edit mode with re-extract button -->
+          <div id="transcript-edit-container" class="transcript-edit-container" style="display: none;">
+            <textarea id="transcript-edit-textarea" class="transcript-textarea" rows="4" placeholder="I-type o iwasto ang transcript dito..."></textarea>
+            <div class="transcript-edit-actions">
+              <button id="btn-cancel-edit-transcript" class="btn-secondary btn-sm">Kanselahin</button>
+              <button id="btn-save-edit-transcript" class="btn-primary btn-sm">🔄 I-update ang Form</button>
+            </div>
+          </div>
         </div>
 
         <!-- Clinical Fields Cards -->
@@ -113,16 +229,16 @@
             <div class="field-row">
               <div class="form-group flex-2">
                 <label>Pangalan / Alyas</label>
-                <input type="text" id="inp-patient-label" class="inp-field">
+                <input type="text" id="inp-patient-label" class="inp-field" placeholder="(Hindi nabanggit)">
               </div>
               <div class="form-group flex-1">
                 <label>Edad</label>
-                <input type="number" id="inp-age" class="inp-field">
+                <input type="number" id="inp-age" class="inp-field" placeholder="--">
               </div>
             </div>
             <div class="form-group">
               <label>Barangay / Sitio</label>
-              <input type="text" id="inp-location" class="inp-field">
+              <input type="text" id="inp-location" class="inp-field" placeholder="(Hindi nabanggit)">
             </div>
           </div>
 
@@ -134,11 +250,11 @@
             </div>
             <div class="form-group">
               <label>Chief Complaint</label>
-              <input type="text" id="inp-complaint" class="inp-field">
+              <input type="text" id="inp-complaint" class="inp-field" placeholder="(Hindi nabanggit)">
             </div>
             <div class="form-group">
               <label>Mga Sintomas</label>
-              <input type="text" id="inp-symptoms" class="inp-field">
+              <input type="text" id="inp-symptoms" class="inp-field" placeholder="(Wala)">
             </div>
           </div>
 
@@ -171,27 +287,43 @@
             </div>
             <div class="form-group">
               <label>Gamot na Naibigay / Iniinom</label>
-              <input type="text" id="inp-meds" class="inp-field">
+              <input type="text" id="inp-meds" class="inp-field" placeholder="(Wala)">
             </div>
             <div class="form-group">
               <label>Payo / Tagubilin</label>
-              <input type="text" id="inp-advice" class="inp-field">
+              <input type="text" id="inp-advice" class="inp-field" placeholder="(Wala)">
             </div>
           </div>
 
-          <!-- Barangay Referral Slip Indicator -->
+          <!-- Follow-up Timeframe -->
+          <div class="field-card" data-field="follow_up">
+            <div class="field-header">
+              <span class="field-title">🗓️ Plano sa Pagbalik (Babalikan)</span>
+            </div>
+            <div class="form-group">
+              <label>Kailan Babalikan / Gagawin</label>
+              <input type="text" id="inp-follow-up" class="inp-field" placeholder="(Walang itinakdang balik)">
+            </div>
+          </div>
+
+          <!-- Barangay Referral Slip Indicator with Clean Toggle -->
           <div class="field-card referral-card" id="card-referral" data-field="referral">
             <div class="field-header">
-              <span class="field-title">🏥 RHU Referral Slip</span>
-              <span id="badge-referral" class="badge-urgent">URGENT</span>
+              <div class="referral-toggle-row">
+                <input type="checkbox" id="chk-enable-referral" class="custom-toggle">
+                <label for="chk-enable-referral" class="field-title font-bold">🏥 Mag-isyu ng RHU Referral Slip</label>
+              </div>
+              <span id="badge-referral" class="badge-routine">ROUTINE</span>
             </div>
-            <div class="form-group">
-              <label>Patunguhan (Hospital / Clinic)</label>
-              <input type="text" id="inp-ref-facility" class="inp-field">
-            </div>
-            <div class="form-group">
-              <label>Dahilan ng Paglilipat</label>
-              <input type="text" id="inp-ref-reason" class="inp-field">
+            <div id="referral-fields-container" style="display: none; margin-top: 12px;">
+              <div class="form-group">
+                <label>Patunguhan (Hospital / Clinic)</label>
+                <input type="text" id="inp-ref-facility" class="inp-field" placeholder="Rural Health Unit (RHU)">
+              </div>
+              <div class="form-group">
+                <label>Dahilan ng Paglilipat (Clinical Reason)</label>
+                <input type="text" id="inp-ref-reason" class="inp-field" placeholder="e.g. Hypertension evaluation, persistent fever">
+              </div>
             </div>
           </div>
 
@@ -200,7 +332,7 @@
         <!-- Floating Bottom Confirm Action Bar -->
         <div class="bottom-action-bar">
           <button id="btn-confirm-save" class="btn-primary">
-            ✓ Kumpirmahin at I-export
+            ✓ Kumpirmahin at I-save sa Logbook
           </button>
         </div>
       </section>
@@ -251,9 +383,12 @@
           </a>
         </div>
 
-        <div class="new-visit-action">
-          <button id="btn-new-visit" class="btn-secondary w-full">
-            + Bagong Pagbisita (Start New Visit)
+        <div class="export-nav-actions">
+          <button id="btn-view-logbook" class="btn-primary w-full">
+            📋 Pumunta sa Talaan (View in Logbook)
+          </button>
+          <button id="btn-new-visit" class="btn-secondary w-full" style="margin-top: 10px;">
+            + Magtala ng Isa Pang Pasyente
           </button>
         </div>
       </section>

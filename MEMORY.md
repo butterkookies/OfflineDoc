@@ -78,12 +78,49 @@
   3. Model capacity: Upgraded from `ggml-base.bin` (141 MB) to `ggml-small.bin` (466 MB) with 4-path beam search (`-bs 4`) and complete Taglish clinical context priming.
 - **Verification:** 22/22 pytest tests passing; live `llama-server` on port 8081 functioning in hybrid extraction mode.
 
+### Phase 6: Real-World Rural BHW Field Research & Product Rescue (Oct 9, ~7:30 PM PHT – Present)
+- **Trigger:** Developer & user critique: *"tbh, parang walang sense yung app now"* + inquiry into actual Philippine rural health worker struggles.
+- **Credible Sources & Grounded Field Research:**
+  - *Republic Act 7883* (Barangay Health Workers' Benefits and Incentives Act of 1995) & DOH BHW Pocket Handbook: BHWs receive a modest honorarium (₱1,000–₱3,000/mo), average 45–60 years old, and are legally barred from prescribing prescription medications or making definitive clinical diagnoses. Their official scope is vitals screening, OTC first aid (Paracetamol, Oresol), danger sign recognition, RHU referral, and follow-up tracking (*Babalikan*).
+  - *GIDA (Geographically Isolated and Disadvantaged Areas) Health Delivery Studies (Ateneo School of Medicine & Public Health, UP CPH, JOGHR 2024)*: Sitio valleys and island barangays have zero cellular connectivity. Cloud apps fail 100% of the time. Paper records get damaged by rain and humidity.
+  - *The "Tatlong Beses Isinusulat" (Triple Documentation Burden)*: In typical house-to-house consultations, BHWs must:
+    1. Write notes on doorstep pocket logbooks while standing.
+    2. Write triplicate carbon-copy DOH Referral Slips (*Pormularyo sa Paglilipat*) if red flags are observed (e.g. BP $\ge 140/90$, high pediatric fever).
+    3. Manually re-transcribe visits at night into the Barangay Health Station (BHS) Master Logbook / Target Client List (TCL) for the visiting Rural Health Midwife (RHM) or Municipal Doctor.
+- **7 Critical Flaws Diagnosed & Resolved in Code:**
+  1. **Audio Distortion on iOS (B1):** Web Audio forced `16000Hz` sample rate while iOS Safari mic ran at `48000Hz`, leading to resampled acoustic distortion. *Fix:* Capture at device native sample rate in `web/recorder.js` and use box-filter averaging downsampler to 16 kHz with peak normalization before WAV encoding.
+  2. **Non-Editable Transcript Trapping Errors (B2):** If Whisper misrecognized a proper noun or number, the error cascaded into every extracted field without recourse. *Fix:* Built editable transcript mode (`web/index.html`, `web/app.js`) with an immediate "🔄 I-update ang Form" re-extraction button.
+  3. **Universal False Referral Slips (B3):** Facility was pre-filled with "RHU", making the referral condition always evaluate to true. *Fix:* Converted RHU Referral Slip into a deliberate toggle (`chk-enable-referral`), auto-checked only if red-flag danger vitals (BP $\ge 140/90$, Temp $\ge 38.5^\circ\text{C}$) or doctor referral is spoken.
+  4. **Hallucinated Defaults (B4):** Unmentioned patient names defaulted to "Patient", advice defaulted to "Rest and hydration", and follow-up defaulted to "Next week". *Fix:* Purged all fake fallbacks in `app/extract.py` and `web/app.js` to strictly preserve `null`/empty placeholders (`Hindi nabanggit`).
+  5. **False Location Matching (B5):** Regex matched naked `sa ...`, falsely extracting "sa RHU" or "sa Biyernes" as a sitio location. *Fix:* Restricted location matching strictly to explicit prefixes (`taga Sitio/Barangay/Purok`).
+  6. **Lack of BHW Dictation Guidance (B6):** Health workers had no prompt structure. *Fix:* Added interactive **Gabay sa Pagsasalita (Dictation Cue Card)** to the Record screen outlining the 4-step sequence: Sino $\to$ Reklamo $\to$ Aksyon $\to$ Triage/Plano, with a realistic Taglish clinical sample.
+  7. **Lack of Digital Logbook (B7):** Once exported, data vanished from the screen with no ongoing value for the worker. *Fix:* Created **Talaan ng mga Pagbisita & Babalikan (Screen 0 / Home)** displaying today's visit tallies, RHU referral count, upcoming *Babalikan* follow-up dates, and direct PDF download links.
+- **Verification:** 22/22 pytest tests passing; Uvicorn reloading cleanly on `https://0.0.0.0:8000`.
+
+### Phase 7: Anti-Mental Block UX & Cognitive Load Engineering (Oct 9, ~7:55 PM PHT – Present)
+- **Problem Raised:** *"Di kaya ma-mental block yung mga BHW sa kung anong sasabihin?"*
+- **Field & Academic Findings on CHW Voice Interfaces:**
+  - *SciSpace & NIH Studies on Speech Recognition for Frontline Health Workers (2023–2024)*: Confronting a user with a blank microphone and ticking timer causes "Thinking and Speaking Simultaneously" cognitive overload and "Microphone Freeze" / performance anxiety.
+  - *Demographic Context*: Philippine BHWs average 45–60 years old and communicate through conversational questions during patient check-ups, not by reciting memorized structured clinical monologues.
+- **Implemented Ergonomic Solutions:**
+  1. **Case Presets Chips (`web/index.html`):** Quick selector for high-frequency barrio cases: 🩺 *Hypertension*, 🌡️ *Lagnat/Trangkaso*, 🫁 *Ubo at Sipon*, and 🏠 *Regular na Pagbisita*.
+  2. **Interactive Teleprompter / "Punan-ang-Puwang" (`web/index.html`, `web/styles.css`):** Formats a natural conversational sentence where bracketed token slots (`[Pangalan]`, `[Edad]`, `[BP]`, `[Gamot]`) stand out in color-coded chips. The BHW simply reads the template like a teleprompter and swaps in the actual patient's data.
+  3. **"Walang Pressure" Reassurance Shield:** Reassures the worker on the record screen: *"Huwag mag-alala kung may makalimutan o magkamali ng salita. May pagkakataon kang mag-edit o magdagdag bago i-save ang rekord."*
+- **Verification:** 22/22 pytest tests passing; live PWA interface updated on `https://0.0.0.0:8000`.
+
 ---
 
 ## 3. Active Decisions & Completed Actions
-- [x] Enforce `--language tl` (Tagalog) by default in `app/transcribe.py` so Whisper uses Tagalog tokenizer vocabulary and handles Taglish loanwords without splitting words like "mataas ang".
-- [x] Upgrade to `ggml-small.bin` (~466MB) for 2x–3x higher accuracy on Philippine languages while remaining well under the 1.2GB memory budget.
-- [x] Add beam search (`-bs 4`) in `whisper-cli` decoding loop.
+- [x] Enforce `--language tl` (Tagalog) by default in `app/transcribe.py`.
+- [x] Upgrade to `ggml-small.bin` (~466MB) with beam search (`-bs 4`) for improved Philippine language accuracy.
 - [x] Fix Windows `cp1252` encoding crash in `subprocess.run` with `encoding="utf-8"`.
-- [x] Ensure prompt conditioning carries Tagalog medical context (`--prompt "Ito ay konsultasyon sa Barangay Health Station: pasyente, mataas ang BP, lagnat, temperatura, ubo..."`).
+- [x] Add client-side native-to-16kHz box-filter downsampling with peak normalization in `web/recorder.js`.
+- [x] Eliminate all hallucinated default values in `app/extract.py`.
+- [x] Add editable transcript toggle with instant re-extraction in `web/app.js`.
+- [x] Introduce explicit RHU Referral Slip toggle with emergency vitals auto-detection.
+- [x] Add Dictation Cue Card (*Gabay sa Pagsasalita*) in `web/index.html`.
+- [x] Build BHW Digital Logbook & Follow-up Tracker (*Talaan at Babalikan*) with `/api/visits`.
+- [x] Implement Case Presets (Hypertension, Fever, Cough, Regular) + Interactive Teleprompter (*Punan-ang-Puwang*) to eliminate BHW mental block and microphone anxiety.
+
+
 

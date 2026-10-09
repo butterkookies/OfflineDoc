@@ -42,12 +42,14 @@ def extract_clinical_record_fallback(transcript: str) -> Dict[str, Any]:
         age = int(age_match.group(1))
         evidence["age_years"] = age_match.group(0).strip()
 
-    # 3. Location / Sitio
+    # 3. Location / Sitio (must match explicit taga/Sitio/Barangay/Purok, NOT naked 'sa')
     location = None
-    loc_match = re.search(r"(?:taga|sa|Sitio|Barangay|Purok)\s+([A-Za-z0-9\s]+?)(?:\.|\,|$|Masakit|BP|May)", transcript, re.IGNORECASE)
+    loc_match = re.search(r"(?:taga\s+(?:Sitio\s+|Barangay\s+|Purok\s+)?|Sitio\s+|Barangay\s+|Purok\s+)([A-Za-z0-9]+(?:\s+[A-Za-z0-9]+)?)", transcript, re.IGNORECASE)
     if loc_match:
-        location = loc_match.group(0).strip()
-        evidence["location"] = location
+        candidate = loc_match.group(0).strip()
+        if not re.search(r"RHU|doktor|health\s+center|bukas|kahapon", candidate, re.IGNORECASE):
+            location = candidate
+            evidence["location"] = candidate
 
     # 4. Vitals - Blood Pressure
     bp = None
@@ -86,21 +88,33 @@ def extract_clinical_record_fallback(transcript: str) -> Dict[str, Any]:
 
     # 7. Medications
     meds = []
-    med_match = re.search(r"(?:paracetamol|amoxicillin|losartan|amlodipine|ferrous sulfate)", transcript, re.IGNORECASE)
+    med_match = re.search(r"(?:paracetamol|amoxicillin|losartan|amlodipine|ferrous sulfate|biogesic|neozep|antacid|oresol)", transcript, re.IGNORECASE)
     if med_match:
         meds.append(med_match.group(0).capitalize())
         evidence["medications_given"] = med_match.group(0)
 
-    # 8. Follow-up
+    # 8. Advice given (strictly from transcript, NO hardcoded defaults)
+    advice_given = []
+    adv_match = re.search(r"(?:pinayuhan(?:g)?|sinabihan(?:g)?|payo(?:ng)?)[^\.]*?(?:magpahinga|tubig|kumain|iwasan|uminom)[^\.]*", transcript, re.IGNORECASE)
+    if adv_match:
+        advice_given.append(adv_match.group(0).strip())
+        evidence["advice_given"] = adv_match.group(0).strip()
+    elif re.search(r"(?:magpahinga|uminom ng maraming tubig|iwasan ang maalat)", transcript, re.IGNORECASE):
+        adv_simple = re.search(r"(?:magpahinga|uminom ng maraming tubig|iwasan ang maalat)[^\.]*", transcript, re.IGNORECASE)
+        if adv_simple:
+            advice_given.append(adv_simple.group(0).strip().capitalize())
+            evidence["advice_given"] = adv_simple.group(0).strip()
+
+    # 9. Follow-up (strictly from transcript, empty if unstated)
     follow_up = []
     fu_match = re.search(r"(?:Babalikan|follow[-\s]?up)[^\.]*?(?:Biyernes|Lunes|Martes|Miyerkules|Huwebes|Sabado|Linggo|araw)", transcript, re.IGNORECASE)
     if fu_match:
         follow_up.append({"task": "Home visit follow-up check", "due": fu_match.group(0).strip()})
         evidence["follow_up"] = fu_match.group(0).strip()
 
-    # 9. Referral
+    # 10. Referral (strictly when mentioned)
     referral = None
-    ref_match = re.search(r"(?:RHU|Rural Health Unit|Health Center|Doc|Doktor)[^\.]*?(?:bukas|umaga|ngayon|Lunes|Martes|Miyerkules|Huwebes|Biyernes|Sabado|Linggo|araw)", transcript, re.IGNORECASE)
+    ref_match = re.search(r"(?:RHU|Rural Health Unit|Health Center|Doc|Doktor)[^\.]*?(?:bukas|umaga|ngayon|Lunes|Martes|Miyerkules|Huwebes|Biyernes|Sabado|Linggo|araw|patingnan|magpunta|dalhin)", transcript, re.IGNORECASE)
     if ref_match:
         referral = {
             "facility": "Rural Health Unit (RHU)",
@@ -110,7 +124,7 @@ def extract_clinical_record_fallback(transcript: str) -> Dict[str, Any]:
         evidence["referral"] = ref_match.group(0).strip()
 
     return {
-        "patient_label": patient_label or "Patient",
+        "patient_label": patient_label,
         "visit_date": None,
         "location": location,
         "age_years": age,
@@ -125,7 +139,7 @@ def extract_clinical_record_fallback(transcript: str) -> Dict[str, Any]:
             "weight_kg": None,
         },
         "medications_given": meds,
-        "advice_given": ["Rest and adequate hydration"],
+        "advice_given": advice_given,
         "follow_up": follow_up,
         "referral": referral,
         "evidence": evidence,
@@ -179,13 +193,19 @@ async def extract_clinical_record(transcript: str) -> Dict[str, Any]:
         is_sample_fallback = True
     else:
         try:
-            # Hybrid backfill: if 1.5B LLM omitted symptoms or complaints, backfill from Taglish rules
+            # Hybrid backfill: if 1.5B LLM omitted fields, backfill from Taglish rules
             rule_fallback = extract_clinical_record_fallback(transcript)
-            for k in ["symptoms", "chief_complaint", "location", "medications_given", "follow_up"]:
+            for k in ["patient_label", "symptoms", "chief_complaint", "location", "medications_given", "follow_up"]:
                 if not record_data.get(k) and rule_fallback.get(k):
                     record_data[k] = rule_fallback[k]
                     if k in rule_fallback.get("evidence", {}):
                         record_data.setdefault("evidence", {})[k] = rule_fallback["evidence"][k]
+
+            # Backfill vitals if LLM missed them
+            if rule_fallback.get("vitals", {}).get("bp") and not record_data.get("vitals", {}).get("bp"):
+                record_data.setdefault("vitals", {})["bp"] = rule_fallback["vitals"]["bp"]
+            if rule_fallback.get("vitals", {}).get("temp_c") and not record_data.get("vitals", {}).get("temp_c"):
+                record_data.setdefault("vitals", {})["temp_c"] = rule_fallback["vitals"]["temp_c"]
 
             # Normalize evidence keys from LLM (e.g. bp_reading -> vitals.bp)
             ev = record_data.setdefault("evidence", {})

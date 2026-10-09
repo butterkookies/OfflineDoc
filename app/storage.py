@@ -39,19 +39,29 @@ def get_visit(visit_id: str) -> Optional[Dict[str, Any]]:
 
 def list_visits() -> List[Dict[str, Any]]:
     """
-    Lists recent visits for review.
+    Lists recent visits for the BHW digital logbook and follow-up tracking.
     """
     visits = []
     for p in sorted(config.storage.data_dir.glob("*.json"), reverse=True):
         try:
             with open(p, "r", encoding="utf-8") as f:
                 data = json.load(f)
+                vid = data.get("visit_id", p.stem)
+                has_ref = data.get("referral") is not None
                 visits.append({
-                    "visit_id": data.get("visit_id", p.stem),
-                    "patient_label": data.get("patient_label", "Unknown"),
+                    "visit_id": vid,
+                    "patient_label": data.get("patient_label") or "Hindi pinangalanan",
                     "saved_at": data.get("saved_at", ""),
-                    "location": data.get("location", ""),
-                    "has_referral": data.get("referral") is not None,
+                    "location": data.get("location") or "",
+                    "chief_complaint": data.get("chief_complaint") or "",
+                    "bp": data.get("vitals", {}).get("bp"),
+                    "temp_c": data.get("vitals", {}).get("temp_c"),
+                    "has_referral": has_ref,
+                    "referral_facility": data.get("referral", {}).get("facility") if has_ref else None,
+                    "follow_up": data.get("follow_up", []),
+                    "visit_pdf": f"/api/export/{vid}_visit.pdf",
+                    "referral_pdf": f"/api/export/{vid}_referral.pdf" if has_ref else None,
+                    "checklist_txt": f"/api/export/{vid}_checklist.txt",
                 })
         except Exception:
             continue
