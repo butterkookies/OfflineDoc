@@ -41,7 +41,10 @@ app.add_middleware(
 # Global model state
 whisper_engine = None
 LLM_MODEL_PATH = MODELS_DIR / "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
-LLAMA_CLI_EXE = BIN_DIR / "llama-cli.exe"
+# Newer llama.cpp builds ship the non-interactive CLI as llama-completion.exe
+LLAMA_CLI_EXE = BIN_DIR / "llama-completion.exe"
+if not LLAMA_CLI_EXE.exists():
+    LLAMA_CLI_EXE = BIN_DIR / "llama-cli.exe"
 
 # Expanded vocabulary conditioning for Taglish BHW clinical dictations
 TAGLISH_PROMPT = (
