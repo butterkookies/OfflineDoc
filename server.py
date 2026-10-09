@@ -823,6 +823,28 @@ def get_patients():
             continue
     return sorted(patients, key=lambda x: x.get("patient_id", ""))
 
+@app.delete("/api/patients/{patient_id}")
+def delete_patient(patient_id: str):
+    """Delete a patient card plus all of its committed visits and ITR PDFs."""
+    p_file = PATIENTS_DIR / f"{patient_id}.json"
+    if not p_file.exists():
+        raise HTTPException(status_code=404, detail="Patient not found")
+    removed_visits = 0
+    for v_file in VISITS_DIR.glob("*.json"):
+        try:
+            v_data = json.loads(v_file.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if v_data.get("patient_id") != patient_id:
+            continue
+        pdf_file = PDFS_DIR / f"{v_file.stem}.pdf"
+        if pdf_file.exists():
+            pdf_file.unlink()
+        v_file.unlink()
+        removed_visits += 1
+    p_file.unlink()
+    return {"status": "deleted", "patient_id": patient_id, "visits_removed": removed_visits}
+
 @app.get("/api/visits")
 def get_visits():
     """List all committed encounter visits and generated ITR slips."""

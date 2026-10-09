@@ -745,6 +745,16 @@ button, .pill-chip, .step-pill, .badge {
   box-shadow: 0 4px 14px rgba(0, 85, 254, 0.38);
 }
 
+.btn-card.danger {
+  color: #B42318;
+  border-color: #FDA29B;
+  background: #FFF5F5;
+}
+
+.btn-card.danger:hover {
+  background: #FEE4E2;
+}
+
 /* 4B. Selected Patient Dossier (Tablet & Desktop Split View) */
 .patient-detail-pane {
   display: none;

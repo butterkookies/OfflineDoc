@@ -249,10 +249,25 @@ function renderPatients(patients) {
         <div class="card-actions" style="margin-top: 12px;">
           ${latestPdfBtn}
           <button class="btn-card primary" onclick="event.stopPropagation(); openEncounterModal('${p.patient_id}')">+ Record Visit</button>
+          <button class="btn-card danger" onclick="event.stopPropagation(); deletePatient('${p.patient_id}', '${(p.full_name || '').replace(/'/g, "\\'")}')">Delete</button>
         </div>
       </div>
     `;
   }).join("");
+}
+
+async function deletePatient(patientId, fullName) {
+  if (!confirm(`Delete ${fullName || patientId} and all of their visits? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}`, { method: "DELETE" });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || `Server returned HTTP ${res.status}`);
+    if (activePatient && activePatient.patient_id === patientId) activePatient = null;
+    await initDirectory();
+    if (typeof loadSlips === "function") await loadSlips();
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
 }
 
 // Render Patient Longitudinal Dossier
