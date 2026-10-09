@@ -163,9 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const transData = await transResp.json();
       currentTranscript = transData.transcript;
 
-      if (transData.is_sample_fallback) {
-        setSampleBanner(true);
+      if (!currentTranscript || !currentTranscript.trim()) {
+        alert("Walang narinig na salita o boses mula sa mikropono.\n\nPaki-lakasan po ang boses o ilapit ang mikropono habang nagsasalita, at subukang muli.");
+        return;
       }
+
+      // Live mic recording is active: turn off sample mode
+      setSampleBanner(false);
 
       transcribeTimeBadge.textContent = `${(transData.elapsed_ms / 1000).toFixed(1)}s local`;
 
@@ -199,8 +203,10 @@ document.addEventListener("DOMContentLoaded", () => {
     currentRecord = extData.data;
     currentSpans = extData.verified_spans || {};
 
-    if (extData.is_sample_fallback) {
+    if (isSampleMode) {
       setSampleBanner(true);
+    } else {
+      setSampleBanner(false);
     }
 
     populateReviewScreen(transcriptText, currentRecord, currentSpans);

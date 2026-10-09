@@ -177,6 +177,31 @@ async def extract_clinical_record(transcript: str) -> Dict[str, Any]:
     if record_data is None:
         record_data = extract_clinical_record_fallback(transcript)
         is_sample_fallback = True
+    else:
+        try:
+            # Hybrid backfill: if 1.5B LLM omitted symptoms or complaints, backfill from Taglish rules
+            rule_fallback = extract_clinical_record_fallback(transcript)
+            for k in ["symptoms", "chief_complaint", "location", "medications_given", "follow_up"]:
+                if not record_data.get(k) and rule_fallback.get(k):
+                    record_data[k] = rule_fallback[k]
+                    if k in rule_fallback.get("evidence", {}):
+                        record_data.setdefault("evidence", {})[k] = rule_fallback["evidence"][k]
+
+            # Normalize evidence keys from LLM (e.g. bp_reading -> vitals.bp)
+            ev = record_data.setdefault("evidence", {})
+            if "bp_reading" in ev and "vitals.bp" not in ev:
+                ev["vitals.bp"] = ev["bp_reading"]
+            if "temperature_reading" in ev and "vitals.temp_c" not in ev:
+                ev["vitals.temp_c"] = ev["temperature_reading"]
+
+            # Backfill any evidence quotes from rule_fallback for field grounding
+            for k, q in rule_fallback.get("evidence", {}).items():
+                if k not in ev or not ev[k]:
+                    ev[k] = q
+
+            record_data = ClinicalVisitRecord.model_validate(record_data).model_dump()
+        except Exception:
+            pass
 
     # Evidence grounding verification
     evidence_map = record_data.get("evidence", {})

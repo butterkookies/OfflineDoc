@@ -24,9 +24,10 @@ SYNTHETIC_SAMPLE_TAGLISH = (
     "para ma-check ang hypertension at mabigyan ng regular na maintenance. Babalikan ko sa Biyernes."
 )
 
-def transcribe_audio(wav_path: Path, language: str = "auto") -> TranscriptionResult:
+def transcribe_audio(wav_path: Path, language: str = "tl") -> TranscriptionResult:
     """
     Transcribes audio using local whisper-cli with Philippine Taglish vocabulary priming.
+    Forces Tagalog ('tl') language head by default to prevent English phonetic corruption.
     """
     whisper_exe = config.models.whisper_bin
     model_path = config.models.whisper_model
@@ -36,28 +37,22 @@ def transcribe_audio(wav_path: Path, language: str = "auto") -> TranscriptionRes
 
     # Check if local whisper binary and model exist
     if not (whisper_exe.exists() and model_path.exists()):
-        # Honest fallback mode: explicitly marked as sample/fallback (R5/R7)
-        elapsed = int((time.perf_counter() - start_time) * 1000)
-        return TranscriptionResult(
-            transcript=SYNTHETIC_SAMPLE_TAGLISH,
-            elapsed_ms=elapsed,
-            language="tl-en",
-            is_sample_fallback=True,
-            details={
-                "notice": "Running in SYNTHETIC SAMPLE MODE. Local whisper-cli binary or model not yet downloaded.",
-                "whisper_bin_expected": str(whisper_exe),
-                "whisper_model_expected": str(model_path),
-            },
+        raise FileNotFoundError(
+            f"Local Whisper binary ({whisper_exe}) or model ({model_path}) not found. "
+            "Please ensure bin/whisper-cli.exe and models/ exist."
         )
 
-    # Build command line for whisper-cli
+    # Force Tagalog language head for Taglish medical dictation
+    active_language = "tl" if (language in ["auto", "tl", None, ""]) else language
+
+    # Build command line for whisper-cli with beam search
     cmd = [
         str(whisper_exe),
         "-m", str(model_path),
         "-f", str(wav_path),
-        "-l", language,
+        "-l", active_language,
         "--prompt", prompt,
-        "--no-timestamps",
+        "-bs", "4",
         "-nt",
     ]
 

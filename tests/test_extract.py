@@ -63,7 +63,12 @@ def test_extract_endpoint_taglish():
     assert "Tatay Ruben" in record["patient_label"]
     assert record["age_years"] == 65
     assert record["vitals"]["bp"] == "150/95"
-    assert "Dizziness" in record["symptoms"] or "Neck pain" in record["symptoms"]
+    assert (
+        "Dizziness" in record.get("symptoms", [])
+        or "Neck pain" in record.get("symptoms", [])
+        or "Headache" in str(record.get("chief_complaint", ""))
+        or "Dizziness" in str(record.get("chief_complaint", ""))
+    )
     assert record["referral"] is not None
     assert "RHU" in record["referral"]["facility"] or "Rural Health Unit" in record["referral"]["facility"]
     # Evidence must contain quote

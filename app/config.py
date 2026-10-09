@@ -56,14 +56,21 @@ def load_config() -> AppConfig:
         port=server_data.get("port", 8000),
     )
 
+    default_whisper_model = (
+        BASE_DIR / "models" / "ggml-small.bin"
+        if (BASE_DIR / "models" / "ggml-small.bin").exists()
+        else BASE_DIR / "models" / "ggml-base.bin"
+    )
+
     models = ModelConfig(
         whisper_bin=Path(models_data.get("whisper_bin", BASE_DIR / "bin" / "whisper-cli.exe")),
-        whisper_model=Path(models_data.get("whisper_model", BASE_DIR / "models" / "ggml-base.bin")),
+        whisper_model=Path(models_data.get("whisper_model", default_whisper_model)),
         whisper_initial_prompt=models_data.get(
             "whisper_initial_prompt",
-            "Magandang araw. Pasyente, barangay, sitio, lagnat, ubo, sipon, "
-            "masakit ang ulo, BP, blood pressure, reseta, gamot, paracetamol, "
-            "amoxicillin, follow-up, referral sa health center, RHU.",
+            "Ito ay konsultasyon sa Barangay Health Station. Si Tatay, Nanay, pasyente, "
+            "mataas ang BP, blood pressure, lagnat, temperatura, ubo, sipon, "
+            "masakit ang batok, nahihilo, uminom ng gamot, paracetamol, amoxicillin, "
+            "follow-up sa Biyernes, referral sa RHU doktor.",
         ),
         llama_server_url=models_data.get("llama_server_url", "http://127.0.0.1:8081"),
         llama_model=Path(models_data.get("llama_model", BASE_DIR / "models" / "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf")),
