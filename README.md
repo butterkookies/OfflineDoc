@@ -136,6 +136,15 @@ In terminal 2:
 python -m uvicorn server:app --host 127.0.0.1 --port 8000
 ```
 
+#### Step 4b (Optional): Mobile / Same-Wi-Fi Access
+To use the app from a phone on the same Wi-Fi (microphone requires HTTPS), run this instead of Step 4:
+```powershell
+python run_mobile.py
+```
+It prints `http://<laptop-ip>:8000` and `https://<laptop-ip>:8443`; open the HTTPS one on the phone and accept the self-signed certificate warning. Allow Python through Windows Firewall (Private network) if the phone cannot connect.
+
+> **Troubleshooting:** `Transcription error: open() got an unexpected keyword argument 'metadata_errors'` means a newer `av` package was installed; run `pip install "av==17.1.0"` (already pinned in `requirements.txt`).
+
 #### Step 5: Open the Application in Your Browser
 Open:
 ```

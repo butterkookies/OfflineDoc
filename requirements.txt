@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+faster-whisper
+# av>=18 removed the metadata_errors kwarg that faster-whisper 1.2.x uses
+av==17.1.0
+fpdf2
+cryptography
