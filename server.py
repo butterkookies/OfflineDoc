@@ -13,8 +13,10 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 try:
     from faster_whisper import WhisperModel
-except ImportError:
+    WHISPER_IMPORT_ERROR = None
+except ImportError as _e:
     WhisperModel = None
+    WHISPER_IMPORT_ERROR = _e
 
 from pdf_generator import generate_itr_tcl_pdf
 
@@ -59,6 +61,14 @@ TAGLISH_PROMPT = (
 def get_whisper():
     global whisper_engine
     if whisper_engine is None:
+        if WhisperModel is None:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"faster-whisper is not installed in this Python environment ({WHISPER_IMPORT_ERROR}). "
+                    "Run: python -m pip install -r requirements.txt, then restart the server."
+                ),
+            )
         print("[OfflineDoc] Initializing faster-whisper (model=small, int8)...")
         try:
             whisper_engine = WhisperModel("small", device="cpu", compute_type="int8")
@@ -398,6 +408,8 @@ async def transcribe_audio(file: UploadFile = File(...)):
             "duration_seconds": elapsed,
             "audio_size_bytes": len(content)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         traceback.print_exc()
