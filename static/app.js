@@ -249,10 +249,25 @@ function renderPatients(patients) {
         <div class="card-actions" style="margin-top: 12px;">
           ${latestPdfBtn}
           <button class="btn-card primary" onclick="event.stopPropagation(); openEncounterModal('${p.patient_id}')">+ Record Visit</button>
+          <button class="btn-card danger" onclick="event.stopPropagation(); deletePatient('${p.patient_id}', '${(p.full_name || '').replace(/'/g, "\\'")}')">Delete</button>
         </div>
       </div>
     `;
   }).join("");
+}
+
+async function deletePatient(patientId, fullName) {
+  if (!confirm(`Delete ${fullName || patientId} and all of their visits? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`/api/patients/${encodeURIComponent(patientId)}`, { method: "DELETE" });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || `Server returned HTTP ${res.status}`);
+    if (activePatient && activePatient.patient_id === patientId) activePatient = null;
+    await initDirectory();
+    if (typeof loadSlips === "function") await loadSlips();
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
 }
 
 // Render Patient Longitudinal Dossier
@@ -481,17 +496,34 @@ function initModalEvents() {
 
   // Mobile QR Modal events
   const qrModal = document.getElementById("qrModal");
+
+  async function openQrModal() {
+    qrModal.classList.add("active");
+    const httpEl = document.getElementById("qrHttpUrl");
+    const httpsEl = document.getElementById("qrHttpsUrl");
+    const imgEl = document.getElementById("qrImage");
+    try {
+      const res = await fetch("/api/network");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const net = await res.json();
+      if (httpEl) httpEl.innerText = net.http_url;
+      if (httpsEl) { httpsEl.innerText = net.https_url; httpsEl.href = net.https_url; }
+      if (imgEl) imgEl.src = `/api/qr.svg?url=${encodeURIComponent(net.https_url)}`;
+    } catch (err) {
+      if (httpEl) httpEl.innerText = "Could not detect laptop IP - use the URL printed by run_mobile.py";
+    }
+  }
   const openQrBtn = document.getElementById("openQrModalBtn");
   const closeQrBtn = document.getElementById("closeQrModalBtn");
   const closeQrDoneBtn = document.getElementById("closeQrDoneBtn");
   const navSettingsBtn = document.getElementById("navSettingsBtn");
 
   if (navSettingsBtn && qrModal) {
-    navSettingsBtn.addEventListener("click", () => qrModal.classList.add("active"));
+    navSettingsBtn.addEventListener("click", () => openQrModal());
   }
 
   if (openQrBtn && qrModal) {
-    openQrBtn.addEventListener("click", () => qrModal.classList.add("active"));
+    openQrBtn.addEventListener("click", () => openQrModal());
   }
   if (closeQrBtn && qrModal) {
     closeQrBtn.addEventListener("click", () => qrModal.classList.remove("active"));

@@ -1,5 +1,7 @@
+import io
 import os
 import re
+import socket
 import json
 import time
 import subprocess
@@ -9,9 +11,14 @@ from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel
-from faster_whisper import WhisperModel
+try:
+    from faster_whisper import WhisperModel
+    WHISPER_IMPORT_ERROR = None
+except ImportError as _e:
+    WhisperModel = None
+    WHISPER_IMPORT_ERROR = _e
 
 from pdf_generator import generate_itr_tcl_pdf
 
@@ -41,7 +48,10 @@ app.add_middleware(
 # Global model state
 whisper_engine = None
 LLM_MODEL_PATH = MODELS_DIR / "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
-LLAMA_CLI_EXE = BIN_DIR / "llama-cli.exe"
+# Newer llama.cpp builds ship the non-interactive CLI as llama-completion.exe
+LLAMA_CLI_EXE = BIN_DIR / "llama-completion.exe"
+if not LLAMA_CLI_EXE.exists():
+    LLAMA_CLI_EXE = BIN_DIR / "llama-cli.exe"
 
 # Expanded vocabulary conditioning for Taglish BHW clinical dictations
 TAGLISH_PROMPT = (
@@ -53,6 +63,14 @@ TAGLISH_PROMPT = (
 def get_whisper():
     global whisper_engine
     if whisper_engine is None:
+        if WhisperModel is None:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"faster-whisper is not installed in this Python environment ({WHISPER_IMPORT_ERROR}). "
+                    "Run: python -m pip install -r requirements.txt, then restart the server."
+                ),
+            )
         print("[OfflineDoc] Initializing faster-whisper (model=small, int8)...")
         try:
             whisper_engine = WhisperModel("small", device="cpu", compute_type="int8")
@@ -392,6 +410,8 @@ async def transcribe_audio(file: UploadFile = File(...)):
             "duration_seconds": elapsed,
             "audio_size_bytes": len(content)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -563,7 +583,7 @@ def sanitize_and_validate_vitals(data: Dict[str, Any], text: str) -> Dict[str, A
     data["visit_details"] = visit_details
 
     # 3. Sanitize Weight
-    wt_match = re.search(r'(\d{2,3}(?:\.\d+)?)\s*(?:kilos?|kg)', text, re.IGNORECASE)
+    wt_match = re.search(r'(\d{1,3}(?:\.\d+)?)\s*(?:kilos?|kg)', text, re.IGNORECASE)
     if wt_match:
         visit_details["weight_kg"] = float(wt_match.group(1))
 
@@ -574,7 +594,7 @@ def sanitize_and_validate_vitals(data: Dict[str, Any], text: str) -> Dict[str, A
     rep = [s for s in rep if s.lower() not in ["na", "po", "ano", "o", "at", "none"]]
     den = [s for s in den if s.lower() not in ["na", "po", "ano", "o", "at", "none"]]
 
-    if re.search(r'wala na?ng? manas|hindi na nagmanas|no edema', text, re.IGNORECASE):
+    if re.search(r'wala(?:\s+(?:na|nang|ng|po|pong))*\s+manas|hindi na (?:po )?nagmanas|no edema', text, re.IGNORECASE):
         if not any("manas" in s for s in den):
             den.append("manas sa paa / ankle edema")
         rep = [s for s in rep if "manas" not in s]
@@ -635,6 +655,10 @@ def deterministic_clinical_extractor(text: str) -> Dict[str, Any]:
     # Age extraction
     age_match = re.search(r'(\d{1,2})\s*(?:anyos|years old|taong gulang|yo)', text, re.IGNORECASE)
     age = int(age_match.group(1)) if age_match else None
+    months_match = re.search(r'(\d{1,2})\s*(?:months?\s*old|months?|buwan)', text, re.IGNORECASE)
+    if age is None and months_match:
+        age = f"{months_match.group(1)} mos"
+    is_infant = bool(months_match) or bool(re.search(r'\b(?:baby|sanggol|infant)\b', text, re.IGNORECASE))
 
     # Purok extraction
     purok_match = re.search(r'(Purok\s*\d+|Sitio\s*[A-Za-z]+)', text, re.IGNORECASE)
@@ -658,7 +682,7 @@ def deterministic_clinical_extractor(text: str) -> Dict[str, Any]:
     weeks = int(weeks_match.group(1)) if weeks_match else None
 
     # Weight
-    wt_match = re.search(r'(\d{2,3}(?:\.\d+)?)\s*(?:kilos?|kg)', text, re.IGNORECASE)
+    wt_match = re.search(r'(\d{1,3}(?:\.\d+)?)\s*(?:kilos?|kg)', text, re.IGNORECASE)
     weight = float(wt_match.group(1)) if wt_match else None
 
     # Temperature
@@ -669,12 +693,14 @@ def deterministic_clinical_extractor(text: str) -> Dict[str, Any]:
     symptoms_rep = []
     symptoms_den = []
     
-    if re.search(r'wala na?ng? manas|hindi na nagmanas|no edema', text, re.IGNORECASE):
+    if re.search(r'wala(?:\s+(?:na|nang|ng|po|pong))*\s+manas|hindi na (?:po )?nagmanas|no edema', text, re.IGNORECASE):
         symptoms_den.append("manas sa paa (resolved)")
     elif re.search(r'\bmanas\b', text, re.IGNORECASE):
         symptoms_rep.append("manas sa paa / ankle edema")
 
-    if re.search(r'lagnat|nilalagnat|fever', text, re.IGNORECASE):
+    if re.search(r'wala(?:ng|\s+(?:na|nang|ng|po|pong))*\s+lagnat|hindi (?:na )?(?:po )?nilalagnat|no fever|afebrile', text, re.IGNORECASE):
+        symptoms_den.append("fever / lagnat")
+    elif re.search(r'lagnat|nilalagnat|fever', text, re.IGNORECASE):
         symptoms_rep.append("fever / lagnat")
     if re.search(r'ubo|inuubo|cough', text, re.IGNORECASE):
         symptoms_rep.append("cough / ubo")
@@ -693,15 +719,33 @@ def deterministic_clinical_extractor(text: str) -> Dict[str, Any]:
         meds.append("Amlodipine")
     if re.search(r'losartan', text, re.IGNORECASE):
         meds.append("Losartan")
+    vaccine_patterns = [
+        (r'pentavalent\s*(\d)?', "Pentavalent"),
+        (r'\bbcg\b', "BCG"),
+        (r'\b(?:opv|ipv|polio)\b', "Polio (OPV/IPV)"),
+        (r'\bmmr\b|measles|tigdas', "MMR / Measles"),
+        (r'hepatitis\s*b|hep\s*b', "Hepatitis B"),
+        (r'\bpcv\b|pneumococcal', "PCV"),
+        (r'rotavirus', "Rotavirus"),
+        (r'vitamin\s*a\b', "Vitamin A"),
+    ]
+    has_vaccine = bool(re.search(r'bakuna|vaccin|immuniz', text, re.IGNORECASE))
+    for pat, label in vaccine_patterns:
+        vm = re.search(pat, text, re.IGNORECASE)
+        if vm:
+            dose = vm.group(1) if vm.groups() and vm.group(1) else None
+            meds.append(f"{label} {dose}" if dose else label)
+            if label != "Vitamin A":
+                has_vaccine = True
 
     # Program inference
     program = "General Consultation"
     if weeks or "buntis" in text.lower() or "prenatal" in text.lower():
         program = "Maternal Care"
+    elif is_infant or has_vaccine or (isinstance(age, int) and age <= 5):
+        program = "Child Immunization"
     elif sys and sys >= 140 or "hypertension" in text.lower() or "amlodipine" in text.lower() or "losartan" in text.lower():
         program = "Hypertension/Diabetes"
-    elif age and age <= 5:
-        program = "Child Immunization"
 
     evidence = {
         "patient_name": name_match.group(0) if name_match else None,
@@ -769,6 +813,33 @@ def evaluate_clinical_safety_gaps(data: Dict[str, Any]) -> List[str]:
 
     return alerts
 
+def get_lan_ip():
+    """Best-effort LAN IP of this machine (no packets are actually sent)."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+@app.get("/api/network")
+def get_network_info():
+    """LAN URLs the phone should use (ports match run_mobile.py)."""
+    ip = get_lan_ip()
+    return {"lan_ip": ip, "http_url": f"http://{ip}:8000", "https_url": f"https://{ip}:8443"}
+
+@app.get("/api/qr.svg")
+def get_qr_svg(url: str):
+    """Render a QR code for the given URL as SVG (pure Python, no Pillow needed)."""
+    import qrcode
+    import qrcode.image.svg
+    img = qrcode.make(url, image_factory=qrcode.image.svg.SvgPathImage, box_size=8, border=2)
+    buf = io.BytesIO()
+    img.save(buf)
+    return Response(content=buf.getvalue(), media_type="image/svg+xml")
+
 @app.get("/api/patients")
 def get_patients():
     """List all patient cards from local JSON files."""
@@ -780,6 +851,28 @@ def get_patients():
         except Exception:
             continue
     return sorted(patients, key=lambda x: x.get("patient_id", ""))
+
+@app.delete("/api/patients/{patient_id}")
+def delete_patient(patient_id: str):
+    """Delete a patient card plus all of its committed visits and ITR PDFs."""
+    p_file = PATIENTS_DIR / f"{patient_id}.json"
+    if not p_file.exists():
+        raise HTTPException(status_code=404, detail="Patient not found")
+    removed_visits = 0
+    for v_file in VISITS_DIR.glob("*.json"):
+        try:
+            v_data = json.loads(v_file.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if v_data.get("patient_id") != patient_id:
+            continue
+        pdf_file = PDFS_DIR / f"{v_file.stem}.pdf"
+        if pdf_file.exists():
+            pdf_file.unlink()
+        v_file.unlink()
+        removed_visits += 1
+    p_file.unlink()
+    return {"status": "deleted", "patient_id": patient_id, "visits_removed": removed_visits}
 
 @app.get("/api/visits")
 def get_visits():

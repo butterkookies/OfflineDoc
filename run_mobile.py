@@ -49,7 +49,7 @@ def get_lan_ip():
         s.close()
         return ip
     except Exception:
-        return "192.168.254.129"
+        return "127.0.0.1"
 
 async def main():
     ensure_ssl_certs()

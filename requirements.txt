@@ -7,3 +7,4 @@ faster-whisper
 av==17.1.0
 fpdf2
 cryptography
+qrcode

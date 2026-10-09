@@ -1,5 +1,5 @@
 // static/sw.js - OfflineDoc Service Worker for 100% Air-Gapped PWA Execution
-const CACHE_NAME = "offlinedoc-pwa-v1.3";
+const CACHE_NAME = "offlinedoc-pwa-v1.6";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -31,11 +31,12 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch: Cache-first for app shell assets, network with fallback for API
+// Fetch: Network-first for app shell/static assets (always pick up the latest
+// code after a git pull while the laptop is reachable), cache fallback when offline.
+// API calls go to the network with an offline JSON fallback.
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // For API endpoints, prefer network, fall back to offline notification
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -48,22 +49,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // For static assets, use Cache-First with Network fallback
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
-          return networkResponse;
-        }
+    fetch(event.request).then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
         const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        return networkResponse;
-      });
-    })
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+      }
+      return networkResponse;
+    }).catch(() => caches.match(event.request))
   );
 });
