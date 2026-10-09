@@ -102,26 +102,34 @@ OfflineDoc ships with authentic seeded cohorts reflecting the core DOH community
 
 #### Step 1: Clone Repository & Create Virtual Environment
 ```bash
-git clone https://github.com/YourTeam/OfflineDoc.git
+git clone -b Geronimo https://github.com/butterkookies/OfflineDoc.git
 cd OfflineDoc
-python -m venv .venv
+# Use Python 3.10-3.12 (3.13+/3.14 has no faster-whisper/ctranslate2 wheels yet)
+py -3.12 -m venv .venv        # Windows; on Linux/macOS: python3.12 -m venv .venv
 # On Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
+#   (if "running scripts is disabled": Set-ExecutionPolicy -Scope CurrentUser RemoteSigned, then retry)
 # On Linux/macOS:
 source .venv/bin/activate
 
-pip install -r requirements.txt
+# Your prompt must now start with "(.venv)". If it doesn't, the venv is not active
+# and pip/python will not be found or will use the wrong Python.
+python -m pip install -r requirements.txt
 ```
 
 #### Step 2: Download Models & Local Inference Binaries (If not pre-bundled)
-If starting from a fresh clone without pre-downloaded weights:
+If starting from a fresh clone without pre-downloaded weights (Windows, needs internet once):
 ```powershell
 # Run the automated setup script
 .\setup_models.ps1
 ```
-Or manually place:
-* `models/Llama-3.2-1B-Instruct-Q4_K_M.gguf`
-* `bin/llama-server.exe` and `bin/llama-cli.exe`
+This downloads the llama.cpp Windows CPU build (~20 MB, `llama-server.exe`, `llama-cli.exe`, `llama-completion.exe`) into `bin/` and `Llama-3.2-1B-Instruct-Q4_K_M.gguf` (~0.8 GB) into `models/`. Or manually place:
+* `models/Llama-3.2-1B-Instruct-Q4_K_M.gguf` (e.g. from `bartowski/Llama-3.2-1B-Instruct-GGUF` on Hugging Face)
+* `bin/llama-server.exe` (+ its `ggml*.dll` / `llama.dll` files) from a `llama-<tag>-bin-win-cpu-x64.zip` release of [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/releases)
+
+No whisper.cpp binary is needed: speech-to-text uses `faster-whisper`, which downloads the Whisper `small` model (~460 MB) from Hugging Face automatically on the first transcription and caches it locally.
+
+If the LLM server from Step 3 is not running, the backend still works but falls back to a deterministic regex extractor (lower quality, but `test_scenarios.py` still passes).
 
 #### Step 3: Start the Local Persistent LLM Server
 In terminal 1:
@@ -135,6 +143,15 @@ In terminal 2:
 ```powershell
 python -m uvicorn server:app --host 127.0.0.1 --port 8000
 ```
+
+#### Step 4b (Optional): Mobile / Same-Wi-Fi Access
+To use the app from a phone on the same Wi-Fi (microphone requires HTTPS), run this instead of Step 4:
+```powershell
+python run_mobile.py
+```
+It prints `http://<laptop-ip>:8000` and `https://<laptop-ip>:8443`; open the HTTPS one on the phone and accept the self-signed certificate warning. Allow Python through Windows Firewall (Private network) if the phone cannot connect.
+
+> **Troubleshooting:** `Transcription error: open() got an unexpected keyword argument 'metadata_errors'` means a newer `av` package was installed; run `pip install "av==17.1.0"` (already pinned in `requirements.txt`).
 
 #### Step 5: Open the Application in Your Browser
 Open:
@@ -155,7 +172,7 @@ This executes all 7 end-to-end verification suites against the running engine:
 * Scenario B: Hypertensive crisis danger sign alert (BP 150/95 mmHg)
 * Scenario C: Missing vitals point-of-care gap alert (unmeasured BP)
 * Scenario D: Child immunization EPI catch-up extraction
-* Scenario E: 4-cohort directory integrity & PDF generation verification
+* Scenario E: Patient directory integrity & PDF generation verification
 
 ---
 
@@ -184,6 +201,6 @@ All benchmarks measured on standard Intel Core i5 laptop running on CPU:
 ## 7. License & Disclosures
 
 * **Models Used:**
-  * Whisper Base Multilingual (OpenAI / faster-whisper, MIT License).
+  * Whisper Small Multilingual, fallback Base (OpenAI / faster-whisper CTranslate2 INT8, MIT License).
   * Llama-3.2-1B-Instruct (Meta Llama 3.2 Community License, Q4_K_M quantized via llama.cpp).
 * **Compliance Statement:** Developed for the App Builders PH Hackathon (October 2026). All data tested and seeded consists of purely synthetic community clinical vignettes; zero real-world Protected Health Information (PHI) was used.

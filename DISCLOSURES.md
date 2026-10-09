@@ -3,7 +3,7 @@
 **Project:** OfflineDoc  
 **Event:** AppBuildersPH Hackathon 2026 (Local AI Theme)  
 **Owners:** Andrei (Build captain), Brian (Product & Demo captain), Christian (Quality captain)  
-**Compliance Rules:** [RULEBOOK.md](file:///c:/Users/user/Documents/ANDREI_FILES/DEVFILES/PROJECTS/OfflineDoc/RULEBOOK.md) (R9, R12) | [PROJECT_CONTRACT.md](file:///c:/Users/user/Documents/ANDREI_FILES/DEVFILES/PROJECTS/OfflineDoc/PROJECT_CONTRACT.md)
+**Compliance Rules:** [RULEBOOK.md](RULEBOOK.md) (R9, R12) | [PROJECT_CONTRACT.md](PROJECT_CONTRACT.md)
 
 ---
 
@@ -11,8 +11,9 @@
 
 | Component | Model Name | Version / Quantization | Parameter Count | Execution Runtime |
 |---|---|---|---|---|
-| **Speech-to-Text (STT)** | `whisper-base.en` / `whisper-tiny.en` (fallback: `moonshine-tiny`) | GGUF / Q8 / FP16 | 39M – 74M | Local `whisper.cpp` binary (CPU/GPU) / Transformers.js |
-| **Extraction & Structuring (SLM)** | `Llama-3.2-3B-Instruct` (fallback: `Llama-3.2-1B-Instruct` or `Qwen2.5-1.5B-Instruct`) | Q4_K_M GGUF | 1.23B – 3.21B | Local `llama.cpp` (`llama-server`) / WebGPU |
+| **Speech-to-Text (STT)** | OpenAI Whisper `small` multilingual (fallback: `base`), via `faster-whisper` (Systran CTranslate2 conversion) | CTranslate2 INT8 | 244M (`small`) / 74M (`base`) | Local `faster-whisper` / CTranslate2 on CPU, language forced to `tl` |
+| **Extraction & Structuring (SLM)** | `Llama-3.2-1B-Instruct` (bartowski GGUF) | Q4_K_M GGUF | 1.23B | Local `llama.cpp` (`llama-server` on 127.0.0.1:8080, fallback `llama-cli.exe`) |
+| **Extraction fallback (no model)** | Deterministic regex extractor (`deterministic_clinical_extractor` in `server.py`) | n/a | 0 | Pure Python; used only when no local LLM is available |
 
 *Note: All models execute 100% locally on the device hardware. Zero weights or audio streams are transmitted over external networks.*
 
@@ -21,26 +22,27 @@
 ## 2. Technologies, Frameworks & Libraries
 
 ### Backend & Local Runtime
-* **Runtime:** Python 3.11+
-* **Local Web Framework:** FastAPI + Uvicorn (bound to `127.0.0.1`)
+* **Runtime:** Python 3.10+ (3.12 recommended; dependencies pinned in `requirements.txt`)
+* **Local Web Framework:** FastAPI + Uvicorn + `python-multipart` (`start.ps1` binds to `127.0.0.1:8000`; `run_mobile.py` binds to `0.0.0.0` on 8000/HTTP and 8443/HTTPS for same-Wi-Fi phone access)
 * **Local AI Execution Engines:**
-  * `llama.cpp` / `llama-server` (C++ inference engine)
-  * `whisper.cpp` (C++ speech-to-text inference engine)
-* **Document Generation:** `fpdf2` (deterministic offline PDF report generation with bundled local fonts)
-* **Data Validation:** `pydantic` (JSON Schema enforcement)
+  * `faster-whisper` 1.2.x + `ctranslate2` (speech-to-text) with `av` / PyAV 17.1.0 (audio decoding)
+  * `llama.cpp` / `llama-server` (C++ inference engine for the GGUF SLM)
+* **Document Generation:** `fpdf2` (deterministic offline PDF report generation)
+* **Data Validation:** `pydantic` (request/response schema enforcement)
+* **Transport Security:** `cryptography` (generates a self-signed certificate `cert.pem`/`key.pem` so phone browsers allow microphone access over LAN HTTPS)
 
 ### Frontend & PWA
 * **UI Architecture:** Responsive Single Page Application (SPA / PWA)
 * **Styling & Interaction:** Clean vanilla HTML5, CSS3, modern ES6+ JavaScript
 * **PWA Capabilities:** Web App Manifest (`manifest.json`), Service Worker (`sw.js`) for offline asset caching, Add-to-Home-Screen (A2HS) support for iOS & Android
-* **Audio Capture:** HTML5 MediaStream Recording API (16 kHz mono WAV)
+* **Audio Capture:** HTML5 `MediaRecorder` API (browser-native container, typically WebM/Opus; decoded server-side by PyAV)
 
 ---
 
 ## 3. APIs and Cloud Services
 
 * **External Cloud AI APIs:** **NONE** (Explicitly zero. No OpenAI, Anthropic, Gemini, or remote inference APIs used for core functionality).
-* **Secondary Cloud Component ([Rule R8](file:///c:/Users/user/Documents/ANDREI_FILES/DEVFILES/PROJECTS/OfflineDoc/RULEBOOK.md)):** **Supabase** (Optional opportunistic sync for structured JSON records and PDF reports when Wi-Fi is detected at the health center. The core application functions 100% autonomously offline without this service).
+* **Secondary Cloud Component ([Rule R8](RULEBOOK.md)):** None in the current build. (Supabase opportunistic sync was planned but is **not implemented**; all records stay in the local `data/` folder as JSON + PDF.)
 
 ---
 
@@ -57,7 +59,7 @@ The team used the following AI-assisted development tools to plan, design, write
 1. **Google Antigravity IDE (Agentic Coding Pair Programmer):** Used for codebase scaffolding, architectural verification, research gathering, and prompt engineering.
 2. **Claude 3.7 Sonnet / ChatGPT:** Used for early brainstorming, synthetic clinical scenario generation, and documentation drafting.
 3. **CapCut / Screen Recording Tools:** Used for recording and editing the required 1-minute live demonstration video.
-4. **Devin / Cognition:** Disclosed per organizer guidelines for hackathon workflow execution where applicable.
+4. **Devin (Cognition):** Used for debugging the mobile/LAN setup, pinning dependencies (`requirements.txt`), fixing the regex fallback extractor and verification suite, and keeping this disclosure in sync with the code.
 
 ---
 
@@ -65,9 +67,10 @@ The team used the following AI-assisted development tools to plan, design, write
 
 * **What runs locally:**
   * Voice recording and microphone input
-  * Speech-to-text transcription (whisper.cpp)
-  * Clinical entity extraction, gap check, and evidence linking (llama.cpp)
+  * Speech-to-text transcription (faster-whisper / CTranslate2, CPU INT8)
+  * Clinical entity extraction, gap check, and evidence linking (llama.cpp; regex fallback when no model is present)
   * Form editing, patient history synthesis, search, and filtering
   * PDF report export, follow-up checklist generation, and local JSON storage
 * **What requires internet:**
-  * *Nothing during runtime.* The application operates in complete Airplane Mode with zero network access. (Internet is only used during initial one-time cloning and model downloading via `setup_models.ps1`).
+  * *Nothing during runtime.* The application operates in complete Airplane Mode with zero network access.
+  * One-time setup only: cloning the repo, `pip install -r requirements.txt`, `setup_models.ps1` (llama.cpp binary + Llama 3.2 1B GGUF), and the **first** transcription, which makes `faster-whisper` download the Whisper `small` model (~460 MB) from Hugging Face into the local cache (`~/.cache/huggingface`). After that first run the model is served from disk with no network access.

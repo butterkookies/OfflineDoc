@@ -149,16 +149,15 @@ def run_tests():
     print("  PASS: Scenario D successfully extracted child immunization encounter.")
 
     # 7. Scenario E: 4-Cohort Patient Directory & PDF Download Verification
-    print("\n[TEST 7] Scenario E -- 4-Cohort Patient Directory & PDF Verification")
+    print("\n[TEST 7] Scenario E -- Patient Directory & PDF Verification")
     with urllib.request.urlopen(f"{BASE_URL}/api/patients") as res:
         patients = json.loads(res.read())
-        print(f"  Total Seeded Patients: {len(patients)}")
+        print(f"  Total Patients: {len(patients)}")
         patient_ids = [p["patient_id"] for p in patients]
         print(f"  Patient IDs: {patient_ids}")
-        assert "P-001" in patient_ids
-        assert "P-002" in patient_ids
-        assert "P-003" in patient_ids
-        assert "P-004" in patient_ids
+        # Seeding is disabled (no fake data); the directory must at least contain the patient committed in TEST 5.
+        assert len(patients) >= 1
+        assert any(p.get("full_name", "").lower() == "maria santos" for p in patients)
 
         # Verify each patient has encounters and latest PDF works
         for p in patients:
@@ -169,7 +168,7 @@ def run_tests():
                 v_pdf = get_bytes(f"/api/export-pdf/{last_enc['visit_id']}")
                 assert v_pdf.startswith(b"%PDF-")
                 print(f"    Verified PDF for {p['patient_id']} ({p['full_name']}): {len(v_pdf)} bytes OK")
-        print("  PASS: All 4 cohorts verified with active histories and downloadable DOH ITR PDFs.")
+        print("  PASS: All patients verified with active histories and downloadable DOH ITR PDFs.")
 
     print("\n" + "=" * 80)
     print("ALL 7 VERIFICATION SUITES PASSED! ENGINE & PWA READY FOR FIELD EVALUATION.")
