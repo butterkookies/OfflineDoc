@@ -9,268 +9,220 @@ export const Scene5StructuredRecord: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleSpring = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const card1Spring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
-  const card2Spring = spring({ frame: frame - 20, fps, config: { damping: 14, stiffness: 100 } });
-  const card3Spring = spring({ frame: frame - 30, fps, config: { damping: 14, stiffness: 100 } });
-  const card4Spring = spring({ frame: frame - 40, fps, config: { damping: 14, stiffness: 100 } });
+  const leftSpring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
+  const rightSpring = spring({ frame: frame - 18, fps, config: { damping: 14, stiffness: 100 } });
 
   return (
-    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden' }}>
-      <GridBackground accentColor="#6366f1" />
+    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
+      <GridBackground />
 
+      {/* Header section */}
       <div
         style={{
           position: 'absolute',
-          top: 65,
-          left: 100,
-          right: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          transform: `translateY(${(1 - titleSpring) * 30}px)`,
+          top: 90,
+          left: 140,
+          transform: `translateY(${(1 - titleSpring) * 20}px)`,
           opacity: titleSpring,
         }}
       >
-        <Badge
-          label="STEP 2: LOCAL CLINICAL EXTRACTION"
-          color="#818cf8"
-          bgColor="rgba(99, 102, 241, 0.15)"
-          icon={<span style={{ fontSize: 16 }}>🧠</span>}
-        />
+        <Badge label="LOCAL AI • EVIDENCE LINKED" dotColor="#10b981" textColor="#64748b" />
         <h1
           style={{
-            fontSize: 58,
-            fontWeight: 800,
-            color: '#ffffff',
-            margin: '12px 0 0 0',
+            fontSize: 68,
+            fontWeight: 900,
+            margin: '14px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             letterSpacing: '-0.02em',
+            lineHeight: 1.1,
           }}
         >
-          Structured Record with Verifiable Citations.
+          <span style={{ color: '#0f172a' }}>FROM TRANSCRIPT TO </span>
+          <span style={{ color: '#2563eb' }}>VISIT RECORD.</span>
         </h1>
         <p
           style={{
-            fontSize: 22,
-            color: '#94a3b8',
-            margin: '6px 0 0 0',
+            fontSize: 24,
+            color: '#64748b',
+            margin: '12px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
+            fontWeight: 500,
           }}
         >
-          Every vital, symptom, and diagnosis links directly back to its exact audio transcript source.
+          Each detail stays linked to the exact words it came from for complete verification.
         </p>
       </div>
 
+      {/* Main Grid: Left Source Transcript, Right Structured Record */}
       <div
         style={{
           position: 'absolute',
-          top: 250,
-          left: 120,
-          right: 120,
+          top: 300,
+          left: 140,
+          right: 140,
           display: 'grid',
-          gridTemplateColumns: '1.1fr 1fr 1fr',
-          gridTemplateRows: 'auto auto',
-          gap: 24,
+          gridTemplateColumns: '1fr 1.35fr',
+          gap: 36,
         }}
       >
+        {/* Left: Source Transcript with Highlight Pills */}
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 24,
-            padding: 28,
+            backgroundColor: '#ffffff',
+            borderRadius: 32,
+            padding: '36px 40px',
+            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            border: '1px solid #e2e8f0',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card1Spring) * 40}px)`,
-            opacity: card1Spring,
+            height: 480,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - leftSpring) * 30}px)`,
+            opacity: leftSpring,
+          }}
+        >
+          <div>
+            <Badge label="SOURCE TRANSCRIPT" dotColor="#2dd4bf" textColor="#2563eb" />
+
+            <div
+              style={{
+                marginTop: 32,
+                fontSize: 28,
+                fontWeight: 800,
+                color: '#0f172a',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                lineHeight: 1.7,
+              }}
+            >
+              “{' '}
+              <span style={{ backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '4px 10px', borderRadius: 8 }}>
+                Headache
+              </span>{' '}
+              began{' '}
+              <span style={{ backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '4px 10px', borderRadius: 8 }}>
+                this morning
+              </span>{' '}
+              . Blood pressure is{' '}
+              <span style={{ backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '4px 10px', borderRadius: 8 }}>
+                120 over 80
+              </span>{' '}
+              . Follow up in{' '}
+              <span style={{ backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '4px 10px', borderRadius: 8 }}>
+                three days
+              </span>{' '}
+              .”
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '12px 18px',
+              backgroundColor: '#f1f5f9',
+              borderRadius: 12,
+              fontSize: 13,
+              fontWeight: 800,
+              color: '#475569',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            SYNTHETIC VISIT • EVIDENCE VERIFIED ↗
+          </div>
+        </div>
+
+        {/* Right: Structured Visit Record Table */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 32,
+            padding: '36px 40px',
+            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: 480,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - rightSpring) * 30}px)`,
+            opacity: rightSpring,
           }}
         >
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#38bdf8', fontSize: 14, fontWeight: 700 }}>PATIENT DEMOGRAPHICS</span>
+              <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0, fontFamily: 'Inter, sans-serif' }}>
+                STRUCTURED VISIT RECORD
+              </h3>
               <span
                 style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: '#10b981',
+                  backgroundColor: '#ecfdf5',
                   padding: '4px 12px',
                   borderRadius: 999,
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  border: '1px solid rgba(245, 158, 11, 0.4)',
-                  color: '#fbbf24',
-                  fontSize: 13,
-                  fontWeight: 800,
+                  letterSpacing: '0.06em',
                 }}
               >
-                🟡 MONITORING
+                • REVIEW BEFORE CONFIRMING
               </span>
             </div>
-            <h3 style={{ color: '#fff', fontSize: 26, fontWeight: 800, margin: '12px 0 4px 0' }}>
-              Maria Santos, 48 F
-            </h3>
-            <span style={{ color: '#94a3b8', fontSize: 15 }}>Household #104 • Purok 3, Brgy. San Jose</span>
-          </div>
 
-          <div
-            style={{
-              marginTop: 18,
-              padding: '12px 16px',
-              borderRadius: 14,
-              background: 'rgba(99, 102, 241, 0.1)',
-              border: '1px solid rgba(99, 102, 241, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <span style={{ fontSize: 18 }}>🔗</span>
-            <span style={{ color: '#c7d2fe', fontSize: 14, fontWeight: 600 }}>
-              Extracted from: "Si Aling Maria, 48 years old..." [00:01]
-            </span>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(56, 189, 248, 0.3)',
-            borderRadius: 24,
-            padding: 28,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card2Spring) * 40}px)`,
-            opacity: card2Spring,
-          }}
-        >
-          <span style={{ color: '#38bdf8', fontSize: 14, fontWeight: 700 }}>CLINICAL VITALS</span>
-          <div
-            style={{
-              marginTop: 14,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 14,
-            }}
-          >
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: 14 }}>
-              <div style={{ color: '#94a3b8', fontSize: 13 }}>Blood Pressure</div>
-              <div style={{ color: '#fb7185', fontSize: 24, fontWeight: 800 }}>135/85</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: 14 }}>
-              <div style={{ color: '#94a3b8', fontSize: 13 }}>Temperature</div>
-              <div style={{ color: '#f59e0b', fontSize: 24, fontWeight: 800 }}>38.3 °C</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: 14 }}>
-              <div style={{ color: '#94a3b8', fontSize: 13 }}>Heart Rate</div>
-              <div style={{ color: '#34d399', fontSize: 24, fontWeight: 800 }}>84 bpm</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: 14 }}>
-              <div style={{ color: '#94a3b8', fontSize: 13 }}>Resp. Rate</div>
-              <div style={{ color: '#38bdf8', fontSize: 24, fontWeight: 800 }}>18 cpm</div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 24,
-            padding: 28,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card3Spring) * 40}px)`,
-            opacity: card3Spring,
-          }}
-        >
-          <span style={{ color: '#38bdf8', fontSize: 14, fontWeight: 700 }}>CHIEF COMPLAINT</span>
-          <h4 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '10px 0 6px 0' }}>
-            Productive Cough & Fever
-          </h4>
-          <p style={{ color: '#94a3b8', fontSize: 14, margin: 0, lineHeight: 1.4 }}>
-            Duration: 3 days. Accompanied by mild body aches and elevated temperature.
-          </p>
-          <div
-            style={{
-              marginTop: 14,
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
-            {['Cough x 3d', 'Fever 38.3°C', 'Taglish Parsed'].map((pill, i) => (
-              <span
-                key={i}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 8,
-                  background: 'rgba(56, 189, 248, 0.15)',
-                  color: '#38bdf8',
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                {pill}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div
-          style={{
-            gridColumn: 'span 3',
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: 24,
-            padding: '24px 32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card4Spring) * 40}px)`,
-            opacity: card4Spring,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 26,
-              }}
-            >
-              💊
-            </div>
-            <div>
-              <div style={{ color: '#34d399', fontSize: 14, fontWeight: 800 }}>ACTION & TREATMENT PLAN</div>
-              <div style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginTop: 4 }}>
-                Paracetamol 500mg tab q4h PRN • Hydration • 48-Hour Barangay Follow-Up Visit
-              </div>
+            {/* Rows */}
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                { label: 'CHIEF COMPLAINT', value: 'Headache', quote: 'Headache began this morning.' },
+                { label: 'SYMPTOMS', value: 'Started this morning', quote: 'Headache began this morning.' },
+                { label: 'VITALS • BP', value: '120/80', quote: 'Blood pressure is 120 over 80.' },
+                { label: 'FOLLOW-UP', value: 'In three days', quote: 'Follow up in three days.' },
+              ].map((row, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '150px 180px 1fr',
+                    alignItems: 'center',
+                    padding: '8px 0',
+                    borderBottom: i < 3 ? '1px solid #f1f5f9' : 'none',
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#64748b', letterSpacing: '0.04em' }}>
+                    {row.label}
+                  </span>
+                  <span style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>
+                    {row.value}
+                  </span>
+                  <div
+                    style={{
+                      padding: '8px 14px',
+                      backgroundColor: '#eff6ff',
+                      borderRadius: 10,
+                      color: '#2563eb',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    SOURCE ↗ "{row.quote}"
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           <div
             style={{
-              padding: '10px 20px',
-              borderRadius: 12,
-              background: 'rgba(16, 185, 129, 0.2)',
-              border: '1px solid #10b981',
-              color: '#34d399',
-              fontSize: 15,
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
+              paddingTop: 14,
+              borderTop: '1px solid #f1f5f9',
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#10b981',
             }}
           >
-            <span>✓ VERIFIED CITATION LINKED</span>
+            ✓ Verifiable citation links guarantee zero hallucination
           </div>
         </div>
       </div>

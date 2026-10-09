@@ -9,244 +9,307 @@ export const Scene1Problem: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleSpring = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const card1Spring = spring({ frame: frame - 15, fps, config: { damping: 14, stiffness: 100 } });
-  const card2Spring = spring({ frame: frame - 30, fps, config: { damping: 14, stiffness: 100 } });
-  const card3Spring = spring({ frame: frame - 45, fps, config: { damping: 14, stiffness: 100 } });
+  const stackSpring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
+  const clockSpring = spring({ frame: frame - 20, fps, config: { damping: 14, stiffness: 100 } });
 
-  const clockHandRotation = interpolate(frame, [0, 120], [0, 720]);
-  const counterVisits = Math.floor(interpolate(frame, [0, 90], [0, 42000], { extrapolateRight: 'clamp' }));
+  const clockHandRotation = interpolate(frame, [0, 120], [45, 405]);
+  const formsProgress = interpolate(frame, [0, 80], [0, 50], { extrapolateRight: 'clamp' });
 
   return (
-    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden' }}>
-      <GridBackground accentColor="#ef4444" />
+    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
+      <GridBackground />
 
+      {/* Header section */}
       <div
         style={{
           position: 'absolute',
-          top: 80,
-          left: 100,
-          right: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          transform: `translateY(${(1 - titleSpring) * 30}px)`,
+          top: 90,
+          left: 140,
+          transform: `translateY(${(1 - titleSpring) * 20}px)`,
           opacity: titleSpring,
         }}
       >
-        <Badge
-          label="THE FRONTLINE REALITY"
-          color="#f87171"
-          bgColor="rgba(239, 68, 68, 0.15)"
-          icon={<span style={{ fontSize: 16 }}>⚠️</span>}
-        />
+        <Badge label="THE PAPERWORK PILE" dotColor="#10b981" textColor="#64748b" />
         <h1
           style={{
-            fontSize: 64,
-            fontWeight: 800,
-            color: '#ffffff',
-            margin: '16px 0 0 0',
+            fontSize: 68,
+            fontWeight: 900,
+            margin: '14px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             letterSpacing: '-0.02em',
+            lineHeight: 1.1,
           }}
         >
-          Documenting Every Patient Visit Takes Time.
+          <span style={{ color: '#0f172a' }}>DOCUMENTING PAPERS </span>
+          <span style={{ color: '#2563eb' }}>TAKES TIME.</span>
         </h1>
         <p
           style={{
             fontSize: 24,
-            color: '#94a3b8',
-            margin: '10px 0 0 0',
+            color: '#64748b',
+            margin: '12px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
-            maxWidth: 900,
+            fontWeight: 500,
           }}
         >
-          Barangay Health Workers endure hours of repetitive manual handwriting after full house-to-house visitations.
+          For health workers, every visit means another record to write.
         </p>
       </div>
 
+      {/* Left Column: One page becomes a pile */}
       <div
         style={{
           position: 'absolute',
-          top: 290,
+          top: 420,
           left: 140,
-          right: 140,
-          display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr 1fr',
-          gap: 28,
+          width: 380,
+          opacity: titleSpring,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 48,
+            fontWeight: 900,
+            color: '#0f172a',
+            margin: 0,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            lineHeight: 1.15,
+          }}
+        >
+          One page becomes a pile.
+        </h2>
+        <p
+          style={{
+            fontSize: 20,
+            color: '#2563eb',
+            margin: '16px 0 0 0',
+            fontWeight: 600,
+            lineHeight: 1.4,
+            fontFamily: 'Inter, system-ui, sans-serif',
+          }}
+        >
+          And every page asks for your attention.
+        </p>
+
+        {/* Forms completed progress bar */}
+        <div style={{ marginTop: 48 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: 13,
+              fontWeight: 800,
+              color: '#64748b',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              fontFamily: 'Inter, system-ui, sans-serif',
+            }}
+          >
+            <span>FORMS COMPLETED</span>
+            <span>4 / 8</span>
+          </div>
+          <div
+            style={{
+              width: 340,
+              height: 10,
+              backgroundColor: '#e2e8f0',
+              borderRadius: 999,
+              marginTop: 10,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                width: `${formsProgress}%`,
+                height: '100%',
+                background: 'linear-gradient(to right, #2563eb, #10b981)',
+                borderRadius: 999,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Center: Stack of Paper Forms */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 300,
+          left: 720,
+          width: 500,
+          height: 520,
+          transform: `translateY(${(1 - stackSpring) * 30}px)`,
+          opacity: stackSpring,
+        }}
+      >
+        {[
+          { label: 'FORM 01 DOCUMENT DETAILS', top: 0, left: 0 },
+          { label: 'FORM 02 DOCUMENT DETAILS', top: 35, left: 15 },
+          { label: 'FORM 03 DOCUMENT DETAILS', top: 70, left: 30 },
+          { label: 'FORM 04 DOCUMENT DETAILS', top: 105, left: 45 },
+          { label: 'FORM 05 DOCUMENT DETAILS', top: 140, left: 60 },
+          { label: 'FORM 06 DOCUMENT DETAILS', top: 190, left: 80, isFront: true },
+        ].map((form, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: form.top,
+              left: form.left,
+              width: 440,
+              height: 260,
+              backgroundColor: '#ffffff',
+              borderRadius: 20,
+              border: '1px solid #cbd5e1',
+              boxShadow: '0 16px 36px rgba(15, 23, 42, 0.08)',
+              padding: 24,
+              display: 'flex',
+              flexDirection: 'column',
+              boxSizing: 'border-box',
+              zIndex: i,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                color: form.isFront ? '#2563eb' : '#475569',
+                letterSpacing: '0.08em',
+                fontFamily: 'Inter, system-ui, sans-serif',
+              }}
+            >
+              {form.label}
+            </div>
+            {/* Mock text lines */}
+            <div
+              style={{
+                marginTop: 30,
+                height: 8,
+                width: '80%',
+                backgroundColor: '#e2e8f0',
+                borderRadius: 4,
+              }}
+            />
+            <div
+              style={{
+                marginTop: 14,
+                height: 8,
+                width: '65%',
+                backgroundColor: '#e2e8f0',
+                borderRadius: 4,
+              }}
+            />
+            <div
+              style={{
+                marginTop: 14,
+                height: 8,
+                width: '90%',
+                backgroundColor: '#e2e8f0',
+                borderRadius: 4,
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Right Column: Analog Clock */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 350,
+          right: 180,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          transform: `translateY(${(1 - clockSpring) * 20}px)`,
+          opacity: clockSpring,
         }}
       >
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: 24,
-            padding: 36,
+            width: 220,
+            height: 220,
+            borderRadius: '50%',
+            backgroundColor: '#ffffff',
+            border: '8px solid #f1f5f9',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.08)',
+            position: 'relative',
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card1Spring) * 40}px)`,
-            opacity: card1Spring,
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <span style={{ color: '#ef4444', fontWeight: 700, fontSize: 14, letterSpacing: '0.05em' }}>
-                BURDEN #1: TIME DRAIN
-              </span>
-              <h3 style={{ color: '#fff', fontSize: 28, fontWeight: 700, margin: '8px 0 0 0' }}>
-                45+ Mins Lost
-              </h3>
-              <p style={{ color: '#94a3b8', fontSize: 16, margin: '6px 0 0 0' }}>
-                Per patient visit spent handwriting notes and duplicating registries.
-              </p>
-            </div>
+          {/* Clock hour markers */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
             <div
+              key={deg}
               style={{
-                width: 72,
-                height: 72,
-                borderRadius: '50%',
-                border: '3px solid #ef4444',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(239, 68, 68, 0.1)',
-                boxShadow: '0 0 20px rgba(239, 68, 68, 0.3)',
+                position: 'absolute',
+                width: 2,
+                height: deg % 90 === 0 ? 10 : 6,
+                backgroundColor: '#94a3b8',
+                top: 10,
+                left: 101,
+                transformOrigin: 'bottom center',
+                transform: `rotate(${deg}deg) translateY(-85px)`,
               }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  width: 3,
-                  height: 24,
-                  backgroundColor: '#ef4444',
-                  top: 12,
-                  borderRadius: 2,
-                  transformOrigin: 'bottom center',
-                  transform: `rotate(${clockHandRotation}deg)`,
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  width: 4,
-                  height: 16,
-                  backgroundColor: '#f87171',
-                  top: 20,
-                  borderRadius: 2,
-                  transformOrigin: 'bottom center',
-                  transform: `rotate(${clockHandRotation * 0.1}deg)`,
-                }}
-              />
-              <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#fff', zIndex: 2 }} />
-            </div>
-          </div>
+            />
+          ))}
 
+          {/* Minute hand (blue) */}
           <div
             style={{
-              marginTop: 24,
-              padding: '16px 20px',
-              borderRadius: 14,
-              background: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
+              position: 'absolute',
+              width: 4,
+              height: 65,
+              backgroundColor: '#2563eb',
+              top: 45,
+              borderRadius: 3,
+              transformOrigin: 'bottom center',
+              transform: `rotate(${clockHandRotation}deg)`,
             }}
-          >
-            <span style={{ fontSize: 24 }}>⏳</span>
-            <span style={{ color: '#fca5a5', fontSize: 16, fontWeight: 600 }}>
-              60% of BHW shift spent on paperwork rather than direct care
-            </span>
-          </div>
-        </div>
+          />
 
-        <div
-          style={{
-            background: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 24,
-            padding: 36,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card2Spring) * 40}px)`,
-            opacity: card2Spring,
-          }}
-        >
-          <div>
-            <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: 14, letterSpacing: '0.05em' }}>
-              BURDEN #2: PAPER RECORDS
-            </span>
-            <h3 style={{ color: '#fff', fontSize: 28, fontWeight: 700, margin: '8px 0 0 0' }}>
-              Physical Logbooks
-            </h3>
-            <p style={{ color: '#94a3b8', fontSize: 16, margin: '6px 0 0 0' }}>
-              Vulnerable to water damage, lost records, and unsearchable filing cabinets.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-            {['Heavy physical notebooks', 'Prone to human transcription error', 'No searchability in emergencies'].map(
-              (item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ color: '#ef4444', fontSize: 18 }}>✕</span>
-                  <span style={{ color: '#cbd5e1', fontSize: 15 }}>{item}</span>
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 24,
-            padding: 36,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card3Spring) * 40}px)`,
-            opacity: card3Spring,
-          }}
-        >
-          <div>
-            <span style={{ color: '#38bdf8', fontWeight: 700, fontSize: 14, letterSpacing: '0.05em' }}>
-              NATIONAL SCALE
-            </span>
-            <div style={{ fontSize: 52, fontWeight: 900, color: '#38bdf8', margin: '4px 0 0 0' }}>
-              {counterVisits.toLocaleString()}+
-            </div>
-            <h4 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0' }}>
-              Philippine Barangays
-            </h4>
-            <p style={{ color: '#94a3b8', fontSize: 15, margin: '6px 0 0 0' }}>
-              Serving over 115 million citizens across 7,641 islands.
-            </p>
-          </div>
-
+          {/* Hour hand (navy) */}
           <div
             style={{
-              padding: '12px 16px',
-              borderRadius: 12,
-              background: 'rgba(56, 189, 248, 0.1)',
-              border: '1px solid rgba(56, 189, 248, 0.2)',
-              color: '#bae6fd',
-              fontSize: 14,
-              fontWeight: 600,
+              position: 'absolute',
+              width: 5,
+              height: 45,
+              backgroundColor: '#0f172a',
+              top: 65,
+              borderRadius: 3,
+              transformOrigin: 'bottom center',
+              transform: `rotate(${clockHandRotation * 0.15 + 90}deg)`,
             }}
-          >
-            🇵🇭 200,000+ Active Barangay Health Workers
-          </div>
+          />
+
+          {/* Center teal pivot */}
+          <div
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              backgroundColor: '#10b981',
+              zIndex: 10,
+              boxShadow: '0 0 6px rgba(16, 185, 129, 0.5)',
+            }}
+          />
         </div>
+
+        <span
+          style={{
+            marginTop: 24,
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#64748b',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            fontFamily: 'Inter, system-ui, sans-serif',
+          }}
+        >
+          TIME KEEPS MOVING
+        </span>
       </div>
 
       <Subtitles text="For health workers, documenting every patient visit takes time." />

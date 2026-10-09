@@ -32,7 +32,9 @@ Thumbs.db
 # Video & Remotion temp/dependencies
 video_remotion/node_modules/
 video_remotion/out/
+video_remotion/ref_frames/
 *.mp4
 _archive/
+
 
 

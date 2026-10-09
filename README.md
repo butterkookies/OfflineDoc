@@ -241,6 +241,15 @@ In compliance with open disclosure guidelines, the following generative AI tools
 
 Developed with ❤️ for the Filipino frontline healthcare community at the **App Builders PH Hackathon 2026**.
 
+| Proponent | Role & Core Responsibilities | Focus Areas |
+| :--- | :--- | :--- |
+| **Andrei John Geronimo** | **Lead AI Systems & Backend Architect** | On-device Whisper & Llama integration, Taglish speech normalizer, air-gapped API endpoints, local inference performance |
+| **Christian Rey Kasilag** | **Full-Stack Developer, UI/UX & Motion Graphics Lead** | BHW-centric frontline interface, responsive Mobile PWA, Remotion motion graphics pitch, user experience & design systems |
+| **Brian Howard Celon** | **QA Lead, Clinical Workflow & Regulatory Compliance Specialist** | DOH Form 1 / Konsulta schema alignment, RA 10173 data privacy audit, clinical edge-case validation, test automation |
+
+---
+
 * **Project:** OfflineDoc
 * **Repository:** [https://github.com/butterkookies/OfflineDoc](https://github.com/butterkookies/OfflineDoc)
 * **License:** MIT License
+

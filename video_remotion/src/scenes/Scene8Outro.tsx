@@ -1,159 +1,134 @@
 import React from 'react';
-import { useCurrentFrame, interpolate, spring, useVideoConfig, Img, staticFile } from 'remotion';
+import { useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
 import { GridBackground } from '../components/GridBackground';
 import { Subtitles } from '../components/Subtitles';
-import { Badge } from '../components/Badge';
 
 export const Scene8Outro: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const logoSpring = spring({ frame, fps, config: { damping: 12, stiffness: 90 } });
-  const textSpring = spring({ frame: frame - 15, fps, config: { damping: 14, stiffness: 100 } });
-  const footerSpring = spring({ frame: frame - 30, fps, config: { damping: 14, stiffness: 100 } });
-
-  const glowPulse = Math.sin(frame * 0.1) * 20 + 40;
+  const textSpring = spring({ frame: frame - 12, fps, config: { damping: 14, stiffness: 100 } });
+  const underlineWidth = interpolate(frame, [15, 60], [0, 480], { extrapolateRight: 'clamp' });
 
   return (
-    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden' }}>
-      <GridBackground accentColor="#0ea5e9" />
+    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
+      <GridBackground />
 
+      {/* Center Grand Outro */}
       <div
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: 1920,
-          height: 960,
+          height: 1080,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <div style={{ opacity: textSpring, transform: `translateY(${(1 - textSpring) * 20}px)` }}>
-          <Badge
-            label="SOVEREIGN LOCAL AI FOR EVERY BARANGAY"
-            color="#38bdf8"
-            bgColor="rgba(14, 165, 233, 0.2)"
-            icon={<span style={{ fontSize: 16 }}>🇵🇭</span>}
-          />
-        </div>
-
+        {/* Main Logo Container */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 40,
-            marginTop: 28,
+            gap: 32,
             transform: `scale(${logoSpring})`,
           }}
         >
+          {/* Document Logo with Pulse & Checkmark */}
           <div
             style={{
-              width: 160,
-              height: 160,
-              borderRadius: 40,
-              overflow: 'hidden',
-              boxShadow: `0 0 ${glowPulse}px rgba(14, 165, 233, 0.8), 0 25px 50px rgba(0,0,0,0.7)`,
-              border: '4px solid rgba(56, 189, 248, 0.8)',
-              background: '#0f172a',
+              position: 'relative',
+              width: 120,
+              height: 120,
+              borderRadius: '50%',
+              border: '2px solid #2563eb',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 12px 30px rgba(37, 99, 235, 0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Img
-              src={staticFile('OfflineDoc-logo.jpg')}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              {/* Pulse line */}
+              <path d="M8 14h2l1-2 2 4 1-2h2" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+
+            {/* Checkmark badge */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 2,
+                right: 2,
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                backgroundColor: '#2dd4bf',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 15,
+                fontWeight: 900,
+                boxShadow: '0 2px 8px rgba(45, 212, 191, 0.4)',
+              }}
+            >
+              ✓
+            </div>
           </div>
 
+          {/* OfflineDoc Text */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <h1
               style={{
-                fontSize: 100,
+                fontSize: 104,
                 fontWeight: 900,
-                color: '#ffffff',
                 margin: 0,
                 fontFamily: 'Inter, system-ui, sans-serif',
                 letterSpacing: '-0.03em',
                 lineHeight: 1,
-                textShadow: '0 4px 30px rgba(14, 165, 233, 0.5)',
               }}
             >
-              Offline<span style={{ color: '#38bdf8' }}>Doc</span>
+              <span style={{ color: '#0f172a' }}>Offline</span>
+              <span style={{ color: '#2563eb' }}>Doc</span>
             </h1>
-            <span
+
+            {/* Horizontal Blue Underline Bar */}
+            <div
               style={{
-                fontSize: 30,
-                fontWeight: 800,
-                color: '#38bdf8',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                marginTop: 8,
-                fontFamily: 'Inter, system-ui, sans-serif',
+                marginTop: 12,
+                width: underlineWidth,
+                height: 5,
+                backgroundColor: '#2563eb',
+                borderRadius: 3,
               }}
-            >
-              Local Intelligence Anywhere
-            </span>
+            />
           </div>
         </div>
 
+        {/* Grand Slogan */}
         <h2
           style={{
-            fontSize: 44,
-            fontWeight: 700,
-            color: '#f8fafc',
+            fontSize: 26,
+            fontWeight: 800,
             textAlign: 'center',
-            maxWidth: 1200,
-            margin: '36px 0 0 0',
+            margin: '44px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
             opacity: textSpring,
             transform: `translateY(${(1 - textSpring) * 20}px)`,
           }}
         >
-          Local Intelligence for Better Documentation, Anywhere.
+          <span style={{ color: '#94a3b8' }}>LOCAL INTELLIGENCE FOR BETTER </span>
+          <span style={{ color: '#2563eb' }}>DOCUMENTATION, ANYWHERE.</span>
         </h2>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: 20,
-            marginTop: 40,
-            opacity: footerSpring,
-            transform: `translateY(${(1 - footerSpring) * 20}px)`,
-          }}
-        >
-          <div
-            style={{
-              padding: '14px 28px',
-              borderRadius: 999,
-              background: 'rgba(15, 23, 42, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#e2e8f0',
-              fontSize: 18,
-              fontWeight: 700,
-              fontFamily: 'Inter, system-ui, sans-serif',
-            }}
-          >
-            ⚡ Powered by Whisper & Llama C++
-          </div>
-          <div
-            style={{
-              padding: '14px 28px',
-              borderRadius: 999,
-              background: 'rgba(14, 165, 233, 0.2)',
-              border: '1px solid #38bdf8',
-              color: '#38bdf8',
-              fontSize: 18,
-              fontWeight: 700,
-              fontFamily: 'Inter, system-ui, sans-serif',
-            }}
-          >
-            🇵🇭 Built for 42,000+ Philippine Barangays
-          </div>
-        </div>
       </div>
 
       <Subtitles text="OfflineDoc, local intelligence for better documentation, anywhere." />

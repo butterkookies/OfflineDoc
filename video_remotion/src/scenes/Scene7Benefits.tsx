@@ -9,229 +9,227 @@ export const Scene7Benefits: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleSpring = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const card1Spring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
-  const card2Spring = spring({ frame: frame - 25, fps, config: { damping: 14, stiffness: 100 } });
-  const card3Spring = spring({ frame: frame - 40, fps, config: { damping: 14, stiffness: 100 } });
+  const leftCardSpring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
+  const rightCardSpring = spring({ frame: frame - 18, fps, config: { damping: 14, stiffness: 100 } });
 
   return (
-    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden' }}>
-      <GridBackground accentColor="#10b981" />
+    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
+      <GridBackground />
 
+      {/* Header section */}
       <div
         style={{
           position: 'absolute',
-          top: 75,
-          left: 100,
-          right: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          transform: `translateY(${(1 - titleSpring) * 30}px)`,
+          top: 90,
+          left: 140,
+          transform: `translateY(${(1 - titleSpring) * 20}px)`,
           opacity: titleSpring,
         }}
       >
-        <Badge
-          label="THE SOVEREIGN ADVANTAGE"
-          color="#34d399"
-          bgColor="rgba(16, 185, 129, 0.15)"
-          icon={<span style={{ fontSize: 16 }}>🛡️</span>}
-        />
+        <Badge label="PRIVACY-PRESERVING LOCAL AI" dotColor="#10b981" textColor="#64748b" />
         <h1
           style={{
-            fontSize: 62,
-            fontWeight: 800,
-            color: '#ffffff',
+            fontSize: 68,
+            fontWeight: 900,
             margin: '14px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             letterSpacing: '-0.02em',
+            lineHeight: 1.1,
           }}
         >
-          No Cloud Dependency. Total Patient Privacy.
+          <span style={{ color: '#0f172a' }}>PATIENT INFO STAYS </span>
+          <span style={{ color: '#2563eb' }}>ON THIS DEVICE.</span>
         </h1>
         <p
           style={{
             fontSize: 24,
-            color: '#94a3b8',
-            margin: '8px 0 0 0',
+            color: '#64748b',
+            margin: '12px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
-            maxWidth: 1000,
+            fontWeight: 500,
           }}
         >
-          Practical AI designed to support efficient documentation while keeping patient information strictly on the device.
+          Practical local AI supports efficient documentation while safeguarding patient confidentiality.
         </p>
       </div>
 
+      {/* 2-Card Layout */}
       <div
         style={{
           position: 'absolute',
-          top: 290,
+          top: 300,
           left: 140,
           right: 140,
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 32,
+          gridTemplateColumns: '1.45fr 1fr',
+          gap: 36,
         }}
       >
+        {/* Left Card: Dark-bordered Security Enclave */}
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(56, 189, 248, 0.3)',
-            borderRadius: 28,
-            padding: 40,
+            backgroundColor: '#ffffff',
+            borderRadius: 36,
+            border: '4px solid #0f172a',
+            padding: '36px 44px',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.12)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card1Spring) * 40}px)`,
-            opacity: card1Spring,
+            height: 480,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - leftCardSpring) * 30}px)`,
+            opacity: leftCardSpring,
           }}
         >
           <div>
-            <div
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 20,
-                background: 'rgba(14, 165, 233, 0.15)',
-                border: '1px solid rgba(14, 165, 233, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 36,
-              }}
-            >
-              🛡️
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#2dd4bf' }} />
+                <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
+                  127.0.0.1 (Localhost Only)
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: '#065f46',
+                  backgroundColor: '#ecfdf5',
+                  padding: '4px 12px',
+                  borderRadius: 999,
+                  letterSpacing: '0.06em',
+                }}
+              >
+                • AIRPLANE MODE ACTIVE
+              </span>
             </div>
-            <h3 style={{ color: '#fff', fontSize: 26, fontWeight: 800, margin: '24px 0 10px 0' }}>
-              100% Air-Gapped Privacy
-            </h3>
-            <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-              Zero health data leaves the physical device. Fully compliant with RA 10173 (Data Privacy Act).
-            </p>
+
+            {/* Checklist */}
+            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {[
+                'Audio cleared immediately after transcription',
+                'Zero third-party cloud AI APIs used',
+                'Strict JSON schema constrains local LLM output',
+                'Unstated clinical values remain null, never hallucinated',
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span style={{ color: '#10b981', fontSize: 18, fontWeight: 900 }}>✓</span>
+                  <span style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div
             style={{
-              marginTop: 24,
-              padding: '12px 16px',
-              borderRadius: 12,
-              background: 'rgba(14, 165, 233, 0.1)',
-              color: '#38bdf8',
-              fontSize: 14,
-              fontWeight: 700,
+              padding: '14px 20px',
+              backgroundColor: '#f1f5f9',
+              borderRadius: 14,
+              fontSize: 13,
+              fontWeight: 800,
+              color: '#475569',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              textAlign: 'center',
+              fontFamily: 'Inter, sans-serif',
             }}
           >
-            🔒 Zero third-party telemetry
+            SYNTHETIC EVALUATION VERIFIED • RUNS ENTIRELY ON LOCAL HARDWARE
           </div>
         </div>
 
+        {/* Right Card: Local Security Icon */}
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: 28,
-            padding: 40,
+            backgroundColor: '#ffffff',
+            borderRadius: 36,
+            border: '1px solid #e2e8f0',
+            padding: '40px 36px',
+            boxShadow: '0 20px 45px rgba(15, 23, 42, 0.08)',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card2Spring) * 40}px)`,
-            opacity: card2Spring,
+            height: 480,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - rightCardSpring) * 30}px)`,
+            opacity: rightCardSpring,
           }}
         >
-          <div>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 900,
+              color: '#2563eb',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            LOCAL SECURITY
+          </span>
+
+          {/* Document / Enclave Graphic */}
+          <div style={{ position: 'relative' }}>
             <div
               style={{
-                width: 72,
-                height: 72,
-                borderRadius: 20,
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px solid rgba(16, 185, 129, 0.4)',
+                width: 170,
+                height: 190,
+                borderRadius: 24,
+                border: '3px solid #0f172a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 36,
+                backgroundColor: '#f8fafc',
               }}
             >
-              ⚡
+              {/* Document SVG inside */}
+              <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
             </div>
-            <h3 style={{ color: '#fff', fontSize: 26, fontWeight: 800, margin: '24px 0 10px 0' }}>
-              80% Time Saved
-            </h3>
-            <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-              Replaces tedious handwriting with 20-second spoken Taglish summaries and automatic PhilHealth formatting.
-            </p>
+
+            {/* Checkmark circle badge */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -10,
+                right: -10,
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                backgroundColor: '#2dd4bf',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                fontWeight: 900,
+                boxShadow: '0 4px 12px rgba(45, 212, 191, 0.4)',
+              }}
+            >
+              ✓
+            </div>
           </div>
 
           <div
             style={{
-              marginTop: 24,
-              padding: '12px 16px',
-              borderRadius: 12,
-              background: 'rgba(16, 185, 129, 0.1)',
-              color: '#34d399',
-              fontSize: 14,
-              fontWeight: 700,
+              fontSize: 16,
+              fontWeight: 900,
+              color: '#065f46',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              fontFamily: 'Inter, sans-serif',
             }}
           >
-            ⏱️ 20 seconds vs 45 minutes
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(168, 85, 247, 0.3)',
-            borderRadius: 28,
-            padding: 40,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - card3Spring) * 40}px)`,
-            opacity: card3Spring,
-          }}
-        >
-          <div>
-            <div
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 20,
-                background: 'rgba(168, 85, 247, 0.15)',
-                border: '1px solid rgba(168, 85, 247, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 36,
-              }}
-            >
-              💰
-            </div>
-            <h3 style={{ color: '#fff', fontSize: 26, fontWeight: 800, margin: '24px 0 10px 0' }}>
-              ₱0.00 Operating Cost
-            </h3>
-            <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-              No monthly OpenAI / Anthropic bills. Runs forever on existing barangay laptops, desktops, or tablets.
-            </p>
-          </div>
-
-          <div
-            style={{
-              marginTop: 24,
-              padding: '12px 16px',
-              borderRadius: 12,
-              background: 'rgba(168, 85, 247, 0.1)',
-              color: '#c084fc',
-              fontSize: 14,
-              fontWeight: 700,
-            }}
-          >
-            🇵🇭 Sovereign & Accessible
+            100% PRIVATE & OFFLINE
           </div>
         </div>
       </div>

@@ -9,130 +9,120 @@ export const Scene6PdfAndReview: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleSpring = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const leftPanelSpring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
-  const pdfSpring = spring({ frame: frame - 25, fps, config: { damping: 14, stiffness: 100 } });
-  const checkScale = spring({ frame: frame - 45, fps, config: { damping: 12, stiffness: 120 } });
+  const card1Spring = spring({ frame: frame - 10, fps, config: { damping: 14, stiffness: 100 } });
+  const card2Spring = spring({ frame: frame - 18, fps, config: { damping: 14, stiffness: 100 } });
+  const card3Spring = spring({ frame: frame - 26, fps, config: { damping: 14, stiffness: 100 } });
 
   return (
-    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden' }}>
-      <GridBackground accentColor="#0ea5e9" />
+    <div style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden', backgroundColor: '#f5f7fb' }}>
+      <GridBackground />
 
+      {/* Header section */}
       <div
         style={{
           position: 'absolute',
-          top: 65,
-          left: 100,
-          right: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          transform: `translateY(${(1 - titleSpring) * 30}px)`,
+          top: 90,
+          left: 140,
+          transform: `translateY(${(1 - titleSpring) * 20}px)`,
           opacity: titleSpring,
         }}
       >
-        <Badge
-          label="STEP 3: REVIEW & OFFICIAL DOH EXPORT"
-          color="#38bdf8"
-          bgColor="rgba(14, 165, 233, 0.15)"
-          icon={<span style={{ fontSize: 16 }}>📄</span>}
-        />
+        <Badge label="THE HEALTH WORKER STAYS IN CONTROL" dotColor="#10b981" textColor="#64748b" />
         <h1
           style={{
-            fontSize: 58,
-            fontWeight: 800,
-            color: '#ffffff',
-            margin: '12px 0 0 0',
+            fontSize: 68,
+            fontWeight: 900,
+            margin: '14px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
             letterSpacing: '-0.02em',
+            lineHeight: 1.1,
           }}
         >
-          Review, Edit & Export Instant DOH PDF Reports.
+          <span style={{ color: '#0f172a' }}>REVIEW. EDIT. </span>
+          <span style={{ color: '#2563eb' }}>CONFIRM.</span>
         </h1>
         <p
           style={{
-            fontSize: 22,
-            color: '#94a3b8',
-            margin: '6px 0 0 0',
+            fontSize: 24,
+            color: '#64748b',
+            margin: '12px 0 0 0',
             fontFamily: 'Inter, system-ui, sans-serif',
+            fontWeight: 500,
           }}
         >
-          Health workers maintain full clinical control before generating standard PhilHealth Konsulta reports.
+          Health workers verify the note before generating exportable records.
         </p>
       </div>
 
+      {/* Three Cards Layout */}
       <div
         style={{
           position: 'absolute',
-          top: 250,
-          left: 120,
-          right: 120,
+          top: 310,
+          left: 140,
+          right: 140,
           display: 'grid',
-          gridTemplateColumns: '1fr 1.1fr',
-          gap: 40,
+          gridTemplateColumns: '1.2fr 1.1fr 1.1fr',
+          gap: 32,
         }}
       >
+        {/* Card 1: Visit Note (Editable) */}
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            backgroundColor: '#ffffff',
             borderRadius: 28,
             padding: 36,
+            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            border: '1px solid #e2e8f0',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-            transform: `translateY(${(1 - leftPanelSpring) * 40}px)`,
-            opacity: leftPanelSpring,
+            height: 420,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - card1Spring) * 30}px)`,
+            opacity: card1Spring,
           }}
         >
           <div>
-            <span style={{ color: '#38bdf8', fontSize: 14, fontWeight: 700 }}>CLINICAL VERIFICATION SUITE</span>
-            <h3 style={{ color: '#fff', fontSize: 26, fontWeight: 800, margin: '10px 0 16px 0' }}>
-              Human-In-The-Loop Safety
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0, fontFamily: 'Inter, sans-serif' }}>
+                VISIT NOTE
+              </h3>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', letterSpacing: '0.08em' }}>
+                CONFIRMED RECORD
+              </span>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
               {[
-                { title: 'Click-to-Edit Records', desc: 'Modify any field or vital signs with instant inline updates' },
-                { title: 'Teleprompter Guides', desc: '9 clinical presets for Hypertension, Prenatal, Cough & Diabetes' },
-                { title: 'Live Camera Capture', desc: 'Attach photos of prescriptions, wounds, or skin lesions' },
-                { title: 'Instant Audit Trail', desc: 'Tracks who recorded and validated the patient record' },
-              ].map((item, i) => (
+                { label: 'CHIEF CONCERN', value: 'Headache' },
+                { label: 'SYMPTOMS', value: 'Started this morning' },
+                { label: 'VITALS • BP', value: '120/80' },
+              ].map((field, i) => (
                 <div
                   key={i}
                   style={{
-                    padding: '14px 18px',
-                    borderRadius: 14,
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
                     display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: 14,
+                    padding: '8px 0',
+                    borderBottom: '1px solid #f1f5f9',
                   }}
                 >
-                  <div
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#64748b' }}>{field.label}</span>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{field.value}</span>
+                  <span
                     style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      background: 'rgba(16, 185, 129, 0.2)',
-                      border: '1px solid #10b981',
-                      color: '#34d399',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: 800,
+                      color: '#2563eb',
+                      backgroundColor: '#eff6ff',
+                      padding: '4px 10px',
+                      borderRadius: 6,
                     }}
                   >
-                    ✓
-                  </div>
-                  <div>
-                    <div style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{item.title}</div>
-                    <div style={{ color: '#94a3b8', fontSize: 13 }}>{item.desc}</div>
-                  </div>
+                    EDIT
+                  </span>
                 </div>
               ))}
             </div>
@@ -140,172 +130,155 @@ export const Scene6PdfAndReview: React.FC = () => {
 
           <div
             style={{
-              padding: '16px 20px',
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              boxShadow: '0 10px 25px rgba(14, 165, 233, 0.4)',
+              padding: '14px 20px',
+              backgroundColor: '#047857',
+              color: '#ffffff',
+              borderRadius: 14,
+              fontSize: 16,
+              fontWeight: 800,
+              textAlign: 'center',
+              letterSpacing: '0.04em',
+              fontFamily: 'Inter, sans-serif',
+              boxShadow: '0 8px 20px rgba(4, 120, 87, 0.25)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 24 }}>⚡</span>
-              <span style={{ fontSize: 16, fontWeight: 700 }}>1-Tap Vector PDF Export</span>
-            </div>
-            <span
-              style={{
-                padding: '4px 10px',
-                borderRadius: 8,
-                background: 'rgba(255,255,255,0.2)',
-                fontSize: 13,
-                fontWeight: 800,
-              }}
-            >
-              0.04s EXPORT
-            </span>
+            ✓ VISIT NOTE CONFIRMED
           </div>
         </div>
 
+        {/* Card 2: PDF Visit Report */}
         <div
           style={{
-            background: '#ffffff',
-            borderRadius: 24,
+            backgroundColor: '#ffffff',
+            borderRadius: 28,
             padding: 36,
-            color: '#0f172a',
-            fontFamily: 'Inter, system-ui, sans-serif',
-            boxShadow: '0 30px 60px rgba(0,0,0,0.6)',
-            transform: `translateY(${(1 - pdfSpring) * 40}px) scale(0.98)`,
-            opacity: pdfSpring,
+            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            border: '1px solid #e2e8f0',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            height: 420,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - card2Spring) * 30}px)`,
+            opacity: card2Spring,
           }}
         >
           <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: '2px solid #0f172a',
-                paddingBottom: 16,
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', color: '#64748b' }}>
-                  REPUBLIC OF THE PHILIPPINES • DEPARTMENT OF HEALTH
-                </div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', marginTop: 2 }}>
-                  KONSULTA CLINICAL RECORD (FORM 1)
-                </div>
-              </div>
-              <div
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: 8,
-                  background: '#0284c7',
-                  color: '#fff',
-                  fontSize: 13,
-                  fontWeight: 800,
+                  fontSize: 11,
+                  fontWeight: 900,
+                  color: '#2563eb',
+                  backgroundColor: '#eff6ff',
+                  padding: '3px 6px',
+                  borderRadius: 4,
+                  border: '1px solid #bfdbfe',
                 }}
               >
-                PHILHEALTH COMPLIANT
-              </div>
+                PDF
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', letterSpacing: '0.08em' }}>
+                OFFLINEDOC VISIT REPORT
+              </span>
             </div>
 
-            <div
-              style={{
-                marginTop: 20,
-                display: 'grid',
-                gridTemplateColumns: '1.5fr 1fr 1fr',
-                gap: 12,
-                background: '#f8fafc',
-                padding: 16,
-                borderRadius: 12,
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>PATIENT NAME</span>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>Maria Santos</div>
-              </div>
-              <div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>AGE / SEX</span>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>48 / Female</div>
-              </div>
-              <div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>TRIAGE PRIORITY</span>
-                <div style={{ fontSize: 14, fontWeight: 800, color: '#d97706' }}>🟡 MONITORING</div>
-              </div>
-            </div>
+            <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '18px 0 20px 0' }}>
+              Patient visit summary
+            </h3>
 
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: 10,
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ border: '1px solid #cbd5e1', padding: '8px', borderRadius: 8 }}>
-                <span style={{ fontSize: 11, color: '#64748b' }}>BP</span>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>135/85</div>
-              </div>
-              <div style={{ border: '1px solid #cbd5e1', padding: '8px', borderRadius: 8 }}>
-                <span style={{ fontSize: 11, color: '#64748b' }}>TEMP</span>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>38.3 °C</div>
-              </div>
-              <div style={{ border: '1px solid #cbd5e1', padding: '8px', borderRadius: 8 }}>
-                <span style={{ fontSize: 11, color: '#64748b' }}>HR</span>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>84 bpm</div>
-              </div>
-              <div style={{ border: '1px solid #cbd5e1', padding: '8px', borderRadius: 8 }}>
-                <span style={{ fontSize: 11, color: '#64748b' }}>RR</span>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>18 cpm</div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>CHIEF COMPLAINT & FINDINGS</span>
-              <div style={{ fontSize: 14, marginTop: 4, lineHeight: 1.4, color: '#334155' }}>
-                Productive cough with low-grade fever for 3 days. Clear breath sounds bilaterally. Hydration emphasized.
-              </div>
+            {/* Document lines */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ height: 8, width: '95%', backgroundColor: '#cbd5e1', borderRadius: 4 }} />
+              <div style={{ height: 8, width: '90%', backgroundColor: '#e2e8f0', borderRadius: 4 }} />
+              <div style={{ height: 8, width: '70%', backgroundColor: '#e2e8f0', borderRadius: 4 }} />
             </div>
           </div>
 
           <div
             style={{
-              borderTop: '2px dashed #cbd5e1',
-              paddingTop: 16,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              padding: '12px 18px',
+              backgroundColor: '#ecfdf5',
+              color: '#065f46',
+              borderRadius: 14,
+              fontSize: 13,
+              fontWeight: 800,
+              textAlign: 'center',
+              letterSpacing: '0.04em',
+              fontFamily: 'Inter, sans-serif',
             }}
           >
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>OFFICIALLY VERIFIED BY BHW</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>Purok 3 Health Station • San Jose</div>
+            ✓ CONFIRMED BY HEALTH WORKER
+          </div>
+        </div>
+
+        {/* Card 3: Follow-Up Checklist */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 28,
+            padding: 36,
+            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.07)',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: 420,
+            boxSizing: 'border-box',
+            transform: `translateY(${(1 - card3Spring) * 30}px)`,
+            opacity: card3Spring,
+          }}
+        >
+          <div>
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              FOLLOW-UP CHECKLIST
+            </span>
+
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                'Follow up in 3 days',
+                'Re-check BP (baseline 120/80)',
+                'Monitor headache recovery',
+              ].map((task, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
+                      backgroundColor: '#ecfdf5',
+                      border: '1px solid #a7f3d0',
+                      color: '#059669',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      fontWeight: 900,
+                    }}
+                  >
+                    ✓
+                  </div>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{task}</span>
+                </div>
+              ))}
             </div>
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                background: '#10b981',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
-                transform: `scale(${checkScale})`,
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
-              }}
-            >
-              ✓
-            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '12px 18px',
+              backgroundColor: '#f1f5f9',
+              color: '#475569',
+              borderRadius: 14,
+              fontSize: 12,
+              fontWeight: 800,
+              textAlign: 'center',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            READY FOR COMMUNITY WORKER
           </div>
         </div>
       </div>

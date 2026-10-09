@@ -11,7 +11,7 @@ import { Scene8Outro } from './scenes/Scene8Outro';
 
 export const OfflineDocPitch: React.FC = () => {
   return (
-    <div style={{ width: 1920, height: 1080, backgroundColor: '#070b14', position: 'relative' }}>
+    <div style={{ width: 1920, height: 1080, backgroundColor: '#f5f7fb', position: 'relative' }}>
       {/* Attached original voice audio */}
       <Audio src={staticFile('template_audio.wav')} />
 
