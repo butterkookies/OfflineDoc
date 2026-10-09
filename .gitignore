@@ -28,3 +28,11 @@ annex_page_*.png
 Thumbs.db
 .idea/
 .vscode/
+
+# Video & Remotion temp/dependencies
+video_remotion/node_modules/
+video_remotion/out/
+*.mp4
+_archive/
+
+

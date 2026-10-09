@@ -220,11 +220,20 @@ Measured on an entry-level Intel Core i5 laptop running completely on CPU:
 ## 📜 Legal, Statutory & Privacy Disclosures
 
 * **Republic Act No. 7883:** Designed to support accredited Barangay Health Workers in primary community triage.
-* **Republic Act No. 10173 (Data Privacy Act of 2012):** All clinical audio, text, and photos remain strictly on the local device. No telemetry or protected health information (PHI) is ever transmitted to cloud servers.
-* **Open Source Licenses:**
-  * Whisper.cpp (MIT License, Georgi Gerganov)
-  * Qwen 2.5 1.5B (Apache 2.0 License, Alibaba Cloud)
-  * Llama.cpp (MIT License)
+* **Republic Act No. 10173 (Data Privacy Act of 2012):** All clinical audio, text, and photos remain strictly on the local device. Zero telemetry, user analytics, or protected health information (PHI) is ever transmitted to cloud servers.
+
+### 🤖 AI Assistance & Tooling Disclosure (Planning & Implementation)
+In compliance with open disclosure guidelines, the following generative AI tools and models were utilized solely during **planning, architectural design, prototyping, and code implementation**:
+* **Anti-gravity** — `Gemini 3.7/8 Flash High` (Full-stack architecture, Remotion motion graphics pipeline, DOH Konsulta compliance logic, test suite)
+* **Claude** — `Sonnet 5.5` (Clinical taxonomy structuring, Taglish prompt engineering, schema definitions)
+* **ChatGPT** — `GPT-6` (Ideation, BHW frontline workflow mapping, legal & statutory framing)
+
+> 🔒 **Critical Privacy Distinction:** While the above cloud models were used during developer planning and codebase construction, **NONE of these external services are invoked at runtime**. The deployed OfflineDoc system runs in total air-gapped isolation powered exclusively by on-device local weights (`whisper.cpp` and `llama.cpp` / Qwen 1.5B), guaranteeing absolute zero data leakage of patient encounters.
+
+### 📄 Open Source Licenses
+* **Whisper.cpp:** MIT License (Georgi Gerganov)
+* **Qwen 2.5 1.5B:** Apache 2.0 License (Alibaba Cloud)
+* **Llama.cpp:** MIT License (Georgi Gerganov & Contributors)
 
 ---
 
