@@ -1,0 +1,19 @@
+# Python / Environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Local binaries and models
+bin/
+models/
+
+# Application storage
+data/
+*.wav
+
+# OS / Editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
