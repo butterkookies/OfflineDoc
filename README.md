@@ -1,8 +1,5 @@
 # 🩺 OfflineDoc — 100% On-Device Clinical Voice Assistant for Barangay Health Workers
 
-<p align="center">
-  <img src="OfflineDoc-logo.jpg" alt="OfflineDoc Banner" width="400" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-</p>
 
 <p align="center">
   <strong>An air-gapped, on-device clinical voice documentation assistant that transforms 20–30s spoken Taglish patient encounters into official DOH Konsulta records, digital logbooks, and single-page referral slips in under 4 seconds. Zero cloud calls. 100% local.</strong>
