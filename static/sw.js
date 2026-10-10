@@ -1,5 +1,5 @@
 // static/sw.js - OfflineDoc Service Worker for 100% Air-Gapped PWA Execution
-const CACHE_NAME = "offlinedoc-pwa-v1.6";
+const CACHE_NAME = "offlinedoc-pwa-v1.7";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -41,8 +41,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(event.request).catch(() => {
         return new Response(
-          JSON.stringify({ error: "offline", message: "Edge server is temporarily unreachable in air-gapped mode." }),
-          { headers: { "Content-Type": "application/json" } }
+          JSON.stringify({
+            error: "offline",
+            detail: "Edge server is unreachable. Check local Wi-Fi connection to the laptop edge station."
+          }),
+          { status: 503, headers: { "Content-Type": "application/json" } }
         );
       })
     );

@@ -621,7 +621,16 @@ async function runTranscription() {
     // Immediately trigger LLM schema extraction
     await runExtractionDirect(data.transcript);
   } catch (err) {
-    alert("Transcription error: " + err.message);
+    if (err.message && (err.message.includes("Failed to fetch") || err.message.includes("NetworkError") || err.message.includes("Edge server is unreachable"))) {
+      alert(
+        "Offline Connection Notice:\n\n" +
+        "Could not reach the local OfflineDoc server.\n\n" +
+        "• Mobile (Airplane Mode): Re-enable Wi-Fi in phone settings to stay connected to the laptop hotspot/LAN. The AI runs on the laptop edge server, so local Wi-Fi is needed (no internet required).\n" +
+        "• Laptop: Use http://127.0.0.1:8000 instead of a LAN IP address."
+      );
+    } else {
+      alert("Transcription error: " + err.message);
+    }
   } finally {
     transcribeBtn.innerHTML = `
       <svg class="btn-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
