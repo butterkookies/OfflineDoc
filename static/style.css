@@ -459,12 +459,37 @@ button, .pill-chip, .step-pill, .badge {
 }
 
 /* Responsive Dashboard Layout (PC Grid vs Mobile Flex) */
+/* Responsive Dashboard Layout (PC Grid vs Tablet vs Mobile) */
 .directory-dashboard-grid {
   display: grid;
-  grid-template-columns: 440px 1fr;
-  gap: 32px;
+  grid-template-columns: 400px 1fr;
+  gap: 28px;
   align-items: start;
   padding: 0 40px 120px 40px;
+}
+
+@media (min-width: 1300px) {
+  .directory-dashboard-grid {
+    grid-template-columns: 440px 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .directory-dashboard-grid {
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    padding: 0 24px 120px 24px;
+  }
+  .app-profile-bar {
+    padding: 12px 24px;
+  }
+  .greeting-section {
+    padding: 16px 24px 8px 24px;
+  }
+  .filter-pills-row {
+    padding: 0 24px 16px 24px;
+  }
 }
 
 .dashboard-hero-col {
@@ -587,7 +612,7 @@ button, .pill-chip, .step-pill, .badge {
 .patients-list {
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
@@ -614,7 +639,7 @@ button, .pill-chip, .step-pill, .badge {
   .directory-dashboard-grid {
     display: flex;
     flex-direction: column;
-    padding: 0 0 100px 0;
+    padding: 0 0 120px 0;
     gap: 0;
   }
   .dashboard-hero-col {
@@ -622,7 +647,7 @@ button, .pill-chip, .step-pill, .badge {
     gap: 0;
   }
   .dashboard-hero-col .hero-card-deck {
-    margin: 6px 20px 22px 20px;
+    margin: 6px 16px 20px 16px;
   }
   .desktop-station-card {
     display: none;
@@ -1661,4 +1686,94 @@ button, .pill-chip, .step-pill, .badge {
 .island-icon-btn.active {
   color: var(--primary);
   background: var(--primary-soft);
+}
+
+/* 6. Mic Permission & Audio Preset Modal Enhancements */
+.mic-info-banner {
+  background: var(--primary-soft);
+  border: 1px solid rgba(0, 85, 254, 0.2);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.mic-info-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 85, 254, 0.15);
+}
+
+.mic-info-banner.granted {
+  background: var(--success-bg);
+  border-color: rgba(22, 163, 74, 0.3);
+}
+
+.mic-info-banner.granted .mic-info-icon {
+  color: var(--success-green);
+}
+
+.mic-info-banner.blocked {
+  background: #FEE2E2;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.mic-info-banner.blocked .mic-info-icon {
+  color: #DC2626;
+}
+
+.preset-audio-pill {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.preset-audio-pill:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.preset-audio-pill:active {
+  transform: scale(0.98);
+}
+
+.preset-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.preset-sub {
+  font-size: 11px;
+  color: var(--text-subtle);
+}
+
+/* Ensure backdrop overlay is centered and properly focused */
+.encounter-modal {
+  z-index: 200;
+}
+
+.modal-card {
+  box-shadow: 0 25px 80px -15px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }

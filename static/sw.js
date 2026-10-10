@@ -1,5 +1,5 @@
 // static/sw.js - OfflineDoc Service Worker for 100% Air-Gapped PWA Execution
-const CACHE_NAME = "offlinedoc-pwa-v1.6";
+const CACHE_NAME = "offlinedoc-pwa-v2.0";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -31,24 +31,48 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch: Network-first for app shell/static assets (always pick up the latest
-// code after a git pull while the laptop is reachable), cache fallback when offline.
-// API calls go to the network with an offline JSON fallback.
+// Fetch: Network-first with cache fallback for app shell and read-only API calls
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
+  // Handle read-only API endpoints (Patients directory & visits ledger)
+  if (url.pathname === "/api/patients" || url.pathname === "/api/visits" || url.pathname.startsWith("/api/patients/") || url.pathname.startsWith("/api/export-pdf/")) {
+    if (event.request.method === "GET") {
+      event.respondWith(
+        fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        }).catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          // Fallback empty array so clients never crash on JSON array parsing
+          return new Response(JSON.stringify([]), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+          });
+        })
+      );
+      return;
+    }
+  }
+
+  // Other API calls (POST/DELETE mutations)
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(event.request).catch(() => {
         return new Response(
-          JSON.stringify({ error: "offline", message: "Edge server is temporarily unreachable in air-gapped mode." }),
-          { headers: { "Content-Type": "application/json" } }
+          JSON.stringify({ error: "offline", detail: "Server unreachable in offline / airplane mode." }),
+          { status: 503, headers: { "Content-Type": "application/json" } }
         );
       })
     );
     return;
   }
 
+  // App Shell & Static Assets: Network-first, fallback to cache
   event.respondWith(
     fetch(event.request).then((networkResponse) => {
       if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
