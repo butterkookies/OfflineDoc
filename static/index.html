@@ -245,6 +245,12 @@
               </button>
               <div class="mic-status" id="micStatus">Tap to Start Recording</div>
               <div class="timer" id="recordTimer">00:00</div>
+              <div class="mic-helper-row" style="margin-top: 10px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="pill-chip" id="openMicPermissionBtn" style="padding: 6px 14px; font-size: 12px; gap: 6px; display: inline-flex; align-items: center;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+                  <span>Mic Access &amp; Audio Presets</span>
+                </button>
+              </div>
             </div>
 
             <div class="audio-preview-container" id="audioPreviewContainer" style="display: none;">
@@ -278,36 +284,109 @@
 
               <div class="fields-list" id="fieldsList">
                 <div class="field-item">
-                  <span class="field-label">Patient Name:</span>
-                  <span class="field-val" id="valName">--</span>
+                  <label class="field-label" for="editName">Pangalan ng Pasyente (Patient Name):</label>
+                  <input type="text" class="field-edit-input" id="editName" placeholder="e.g. Maria Santos">
                 </div>
                 <div class="field-item">
-                  <span class="field-label">Age / Sex / Purok:</span>
-                  <span class="field-val" id="valDemographics">--</span>
+                  <label class="field-label">Edad / Kasarian / Purok (Demographics):</label>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%;">
+                    <input type="number" class="field-edit-input" id="editAge" placeholder="Edad" style="max-width: 85px;" min="0" max="120">
+                    <select class="field-edit-select" id="editSex" style="max-width: 130px;">
+                      <option value="Female">Babae (F)</option>
+                      <option value="Male">Lalaki (M)</option>
+                    </select>
+                    <input list="purokOptions" class="field-edit-input" id="editPurok" placeholder="Purok (e.g. Purok 2)" style="flex: 1; min-width: 120px;">
+                    <datalist id="purokOptions">
+                      <option value="Purok 1">
+                      <option value="Purok 2">
+                      <option value="Purok 3">
+                      <option value="Purok 4">
+                      <option value="Purok 5">
+                      <option value="Purok 6">
+                      <option value="Sitio Ibaba">
+                      <option value="Sitio Ilaya">
+                    </datalist>
+                  </div>
                 </div>
                 <div class="field-item">
-                  <span class="field-label">TCL Program:</span>
-                  <span class="field-val" id="valProgram">--</span>
+                  <label class="field-label" for="editProgram">DOH TCL Programa (Clinical Program):</label>
+                  <select class="field-edit-select" id="editProgram" style="width: 100%;">
+                    <option value="Maternal Care">Maternal Care (Buntis / Prenatal Checkup)</option>
+                    <option value="Hypertension/Diabetes">Hypertension/Diabetes (Altapresyon / NCD)</option>
+                    <option value="Child Immunization">Child Immunization (Bakuna / EPI Catch-up)</option>
+                    <option value="General Consultation">General Consultation (Pangkalahatang Konsulta)</option>
+                    <option value="Family Planning">Family Planning (Pagpaplano ng Pamilya)</option>
+                    <option value="Tuberculosis DOTS">Tuberculosis (TB DOTS Program)</option>
+                  </select>
                 </div>
                 <div class="field-item">
-                  <span class="field-label">Blood Pressure:</span>
-                  <span class="field-val" id="valBP">--</span>
+                  <label class="field-label" for="editBP">Presyon / Blood Pressure (BP):</label>
+                  <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                    <input list="bpOptions" type="text" class="field-edit-input" id="editBP" placeholder="e.g. 120/80" style="flex: 1;">
+                    <datalist id="bpOptions">
+                      <option value="110/70">
+                      <option value="120/80 (Normal)">
+                      <option value="130/80">
+                      <option value="140/90 (Elevated / Alert)">
+                      <option value="150/95 (Crisis / Urgent)">
+                      <option value="160/100 (Severe)">
+                    </datalist>
+                    <span id="bpBadge" class="timeline-bp-pill" style="white-space: nowrap;">--</span>
+                  </div>
                 </div>
                 <div class="field-item">
-                  <span class="field-label">Vitals / Weight:</span>
-                  <span class="field-val" id="valMaternal">--</span>
+                  <label class="field-label">Linggo ng Buntis / Timbang (Gestational Age &amp; Weight):</label>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 4px; flex: 1; min-width: 110px;">
+                      <input type="number" class="field-edit-input" id="editGestWeeks" placeholder="Linggo (e.g. 32)" min="0" max="44" style="width: 100%;">
+                      <span style="font-size: 11px; color: var(--text-subtle);">wks</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; flex: 1; min-width: 110px;">
+                      <input type="number" step="0.1" class="field-edit-input" id="editWeight" placeholder="Kilo (e.g. 54.0)" min="0" max="250" style="width: 100%;">
+                      <span style="font-size: 11px; color: var(--text-subtle);">kg</span>
+                    </div>
+                  </div>
                 </div>
                 <div class="field-item">
-                  <span class="field-label">Active Symptoms:</span>
-                  <span class="field-val" id="valSymptoms">--</span>
+                  <label class="field-label" for="editSymptoms">Mga Iniindang Sintomas (Active Symptoms):</label>
+                  <input list="symptomsOptions" type="text" class="field-edit-input" id="editSymptoms" placeholder="Pumili o mag-type ng sintomas...">
+                  <datalist id="symptomsOptions">
+                    <option value="Sakit ng ulo / Sakit ng batok (Headache)">
+                    <option value="Nahihilo / Dizziness">
+                    <option value="Mataas na lagnat (Fever)">
+                    <option value="Ubo at sipon (Cough &amp; Colds)">
+                    <option value="Manas sa paa (Pedal Edema)">
+                    <option value="Walang iniindang sintomas (None)">
+                  </datalist>
                 </div>
                 <div class="field-item">
-                  <span class="field-label">Medications Noted:</span>
-                  <span class="field-val" id="valMeds">--</span>
+                  <label class="field-label" for="editMeds">Mga Gamot / Bakuna (Medications Noted):</label>
+                  <input list="medsOptions" type="text" class="field-edit-input" id="editMeds" placeholder="Pumili o mag-type ng gamot...">
+                  <datalist id="medsOptions">
+                    <option value="Ferrous Sulfate + Folic Acid">
+                    <option value="Amlodipine 5mg OD">
+                    <option value="Losartan 50mg OD">
+                    <option value="Paracetamol 500mg">
+                    <option value="Pentavalent 3 + Vitamin A">
+                    <option value="Oral Rehydration Salts (ORS)">
+                    <option value="Amoxicillin 500mg">
+                  </datalist>
                 </div>
                 <div class="field-item">
-                  <span class="field-label">Clinical Summary:</span>
-                  <span class="field-val" id="valSummary">--</span>
+                  <label class="field-label" for="editSummary">Buod ng Konsulta (Clinical Summary):</label>
+                  <textarea class="field-edit-textarea" id="editSummary" rows="2" placeholder="Isulat o i-edit ang buod ng pasyente..."></textarea>
+                </div>
+
+                <!-- Hidden legacy containers for compatibility -->
+                <div style="display: none;">
+                  <span id="valName">--</span>
+                  <span id="valDemographics">--</span>
+                  <span id="valProgram">--</span>
+                  <span id="valBP">--</span>
+                  <span id="valMaternal">--</span>
+                  <span id="valSymptoms">--</span>
+                  <span id="valMeds">--</span>
+                  <span id="valSummary">--</span>
                 </div>
               </div>
 
@@ -321,7 +400,7 @@
               <svg class="btn-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              <span>Confirm & Commit</span>
+              <span>I-save ang Rekord</span>
             </button>
           </div>
         </div>
@@ -334,8 +413,8 @@
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <h3>Encounter Committed</h3>
-            <p id="successMsg">Visit record saved to local ledger. Patient timeline updated.</p>
+            <h3>Naitala ang Rekord ng Pasyente</h3>
+            <p id="successMsg">Matagumpay na na-save ang rekord ng pasyente sa talaan ng barangay.</p>
             
             <div class="export-actions-row" style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px; width: 100%;">
               <a class="action-btn primary" id="downloadPdfBtn" target="_blank" href="#" style="text-decoration:none; display: inline-flex; justify-content: center;">
@@ -346,7 +425,7 @@
                 </svg>
                 <span>Download Official DOH ITR Slip (PDF)</span>
               </a>
-              <button class="action-btn secondary" id="doneBtn">Return to Patients</button>
+              <button class="action-btn secondary" id="doneBtn">Tingnan ang Listahan ng Pasyente</button>
             </div>
           </div>
         </div>
@@ -418,6 +497,98 @@
 
             <button class="action-btn secondary" id="closeQrDoneBtn" style="width: 100%;">Close</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Microphone Permission & Quick Audio Access Modal -->
+      <div class="encounter-modal" id="micPermissionModal">
+        <div class="modal-card" style="max-width: 440px;">
+          <div class="modal-header">
+            <div>
+              <span class="modal-tag">AUDIO INPUT &amp; PERMISSIONS</span>
+              <h2 style="font-size: 17px; margin-top: 4px;">Pahintulot sa Mikropono</h2>
+            </div>
+            <button class="close-btn" id="closeMicModalBtn" aria-label="Close">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div style="padding: 12px 0;">
+            <div id="micStateBanner" class="mic-info-banner">
+              <div class="mic-info-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </div>
+              <div class="mic-info-text">
+                <strong id="micStateTitle">Pahintulot sa Mikropono</strong>
+                <p id="micStateDesc" style="font-size: 12px; margin-top: 3px; color: var(--text-muted);">Pindutin ang button sa ibaba upang buksan ang mikropono para sa voice dictation.</p>
+              </div>
+            </div>
+
+            <button class="action-btn primary" id="requestMicPermBtn" style="width: 100%; margin: 12px 0 16px 0; justify-content: center;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+              </svg>
+              <span>I-allow ang Mikropono / Request Permission</span>
+            </button>
+
+            <!-- Quick Voice Simulation / Presets -->
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; text-align: left;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-subtle); letter-spacing: 0.5px; margin-bottom: 8px;">
+                O GUMAMIT NG REALISTIC VOICE PRESETS (1-TAP):
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button type="button" class="preset-audio-pill" id="presetMaternalBtn">
+                  <span class="preset-name">Buntis / Maternal Checkup</span>
+                  <span class="preset-sub">Maria Santos &bull; 32 weeks &bull; BP 120/80</span>
+                </button>
+                <button type="button" class="preset-audio-pill" id="presetHtnBtn">
+                  <span class="preset-name">Altapresyon / Danger Sign</span>
+                  <span class="preset-sub">Teresa Ramos &bull; BP 150/95 Crisis Flag</span>
+                </button>
+                <button type="button" class="preset-audio-pill" id="presetEpiBtn">
+                  <span class="preset-name">Bakuna / Child EPI Catch-up</span>
+                  <span class="preset-sub">Baby Joshua &bull; Pentavalent 3 &amp; Vit A</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="mobileHttpsNotice" style="margin-top: 14px; background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 10px 12px; font-size: 11.5px; color: #92400E; text-align: left; line-height: 1.45;">
+              <strong>Paalala para sa Mobile Phone:</strong> Hinihingi ng mobile Chrome/Safari ang <strong>HTTPS</strong> bago payagan ang mic. Kung naka-HTTP ka sa phone, buksan ang <a id="micHttpsLink" href="#" target="_blank" style="color:#B45309; font-weight: 700; text-decoration: underline;">Secure HTTPS Port 8443</a> o gamitin ang Voice Presets sa itaas.
+            </div>
+
+            <button class="action-btn secondary" id="closeMicModalDoneBtn" style="width: 100%; margin-top: 14px;">Isara</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: Offline Deletion Restricted Modal -->
+      <div class="encounter-modal" id="offlineDeleteModal">
+        <div class="modal-card" style="max-width: 400px; text-align: center;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <span class="modal-tag" style="background:#FEE2E2; color:#B91C1C;">ONLINE / STATION ONLY</span>
+          <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 6px 0 8px 0;">Bawal Magbura Habang Offline</h2>
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+            Ang pagbura ng opisyal na rekord ng pasyente o DOH ITR encounter ay nangangailangan ng live na koneksyon sa <strong>Local Station Server</strong> upang mapanatili ang integridad ng audit trail at DOH logbook.
+          </p>
+          <div style="background: var(--bg-card-hover); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--text-subtle); margin-bottom: 16px; text-align: left;">
+            <strong>Proteksyon sa Datos:</strong> Ligtas na nakatala ang pasyente sa lokal na memorya. Kumonekta muli sa istasyon upang baguhin o tanggalin ang rekord.
+          </div>
+          <button class="action-btn primary" id="closeOfflineDeleteBtn" style="width: 100%; justify-content: center;">Naintindihan (Understood)</button>
         </div>
       </div>
     </main>
