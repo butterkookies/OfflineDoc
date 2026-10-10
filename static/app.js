@@ -637,6 +637,9 @@ function closeModal() {
   if (screen) screen.classList.remove("active");
   const backdrop = document.getElementById("encounterFlowBackdrop");
   if (backdrop) backdrop.classList.remove("active");
+  // Always refresh directory and slips so newly committed records appear immediately
+  initDirectory();
+  if (typeof loadSlips === "function") loadSlips();
 }
 
 function goToStep(stepNum) {
@@ -1164,19 +1167,23 @@ function fallbackClientExtraction(transcript) {
   document.getElementById("llmStats").innerText = "Processed in 100% Offline Mode (Local Fallback Parser)";
 }
 
-// 4. Commit Encounter with Offline Storage Resilience
+// 4. Commit Encounter with Immediate List Sync & Friendly Messaging
 async function commitEncounter() {
   if (!currentEncounterData) return;
   const btn = document.getElementById("confirmEncounterBtn");
-  btn.innerText = "Committing to local ledger...";
+  btn.innerText = "Sinisave ang rekord...";
   btn.disabled = true;
 
   const ext = currentEncounterData.extracted_data || {};
+  const patientName = ext.patient_name || (activePatient ? activePatient.full_name : "Pasyente");
+  const purok = ext.purok || (activePatient ? activePatient.purok : "Purok 1");
+  const program = ext.tcl_program || ext.program || (activePatient ? activePatient.program : "General Consultation");
+
   const payload = {
     patient_id: activePatient ? activePatient.patient_id : null,
-    patient_name: ext.patient_name || (activePatient ? activePatient.full_name : "Citizen"),
-    purok: ext.purok || (activePatient ? activePatient.purok : "Purok Unspecified"),
-    program: ext.tcl_program || ext.program || (activePatient ? activePatient.program : "General Consultation"),
+    patient_name: patientName,
+    purok: purok,
+    program: program,
     raw_transcript: document.getElementById("transcriptDisplay").innerText.replace(/^"|"$/g, ""),
     extracted_data: ext,
     evidence_quotes: ext.evidence_quotes || {},
@@ -1190,26 +1197,122 @@ async function commitEncounter() {
       body: JSON.stringify(payload)
     });
     const result = await res.json();
-    
-    document.getElementById("successMsg").innerText = `Encounter committed under data/visits/${result.visit_id}.json. ${result.message}`;
-    
+    if (!res.ok) throw new Error(result.detail || "Server error");
+
+    const visitId = result.visit_id;
+    const pdfUrl = result.pdf_url;
+    const savedPatient = result.patient;
+
+    // 1. Immediately update in-memory allPatients and persistent localStorage
+    if (savedPatient) {
+      const idx = allPatients.findIndex(p => p.patient_id === savedPatient.patient_id || (p.full_name && p.full_name.toLowerCase() === savedPatient.full_name.toLowerCase()));
+      if (idx >= 0) {
+        allPatients[idx] = savedPatient;
+      } else {
+        allPatients.unshift(savedPatient);
+      }
+      activePatient = savedPatient;
+    } else {
+      let target = activePatient;
+      if (!target && payload.patient_name) {
+        target = allPatients.find(p => p.full_name && p.full_name.toLowerCase() === payload.patient_name.toLowerCase());
+      }
+      if (!target) {
+        target = {
+          patient_id: result.patient_id || `P-${String(allPatients.length + 1).padStart(3, "0")}`,
+          full_name: payload.patient_name,
+          purok: payload.purok,
+          age: ext.age || null,
+          sex: ext.sex || "Female",
+          program: payload.program,
+          longitudinal_summary: `${payload.program} tracking for ${payload.patient_name}. Latest BP: ${(ext.vitals && ext.vitals.blood_pressure) || 'N/A'}.`,
+          encounters: []
+        };
+        allPatients.unshift(target);
+      }
+      if (!target.encounters) target.encounters = [];
+      target.encounters.push({
+        visit_num: target.encounters.length + 1,
+        date: new Date().toISOString().split("T")[0],
+        bp: (ext.vitals && ext.vitals.blood_pressure) || "N/A",
+        visit_id: visitId,
+        notes: ext.clinical_summary || "Clinical encounter recorded."
+      });
+      activePatient = target;
+    }
+    localStorage.setItem("offlinedoc_patients_cache", JSON.stringify(allPatients));
+
+    // 2. Also update visits ledger cache for DOH ITR Slips tab
+    let visits = [];
+    try {
+      visits = JSON.parse(localStorage.getItem("offlinedoc_visits_cache") || "[]");
+    } catch (e) {}
+    visits.unshift({
+      ...payload,
+      visit_id: visitId,
+      pdf_url: pdfUrl,
+      created_at: new Date().toISOString().replace("T", " ").substring(0, 19)
+    });
+    localStorage.setItem("offlinedoc_visits_cache", JSON.stringify(visits));
+
+    // 3. Immediately render updated directory and counts in background
+    renderPatients(allPatients);
+    if (typeof renderSlips === "function") renderSlips(visits);
+    const countAllEl = document.getElementById("countAll");
+    if (countAllEl) countAllEl.innerText = allPatients.length;
+    const countTodayEl = document.getElementById("countToday");
+    if (countTodayEl) {
+      countTodayEl.innerText = allPatients.reduce((sum, p) => sum + (p.encounters ? p.encounters.length : 0), 0);
+    }
+
+    // 4. Clean, warm, non-technical success message
+    const displayName = (savedPatient && savedPatient.full_name) || payload.patient_name;
+    document.getElementById("successMsg").innerText = `Matagumpay na naitala ang rekord ni ${displayName}. Na-update na ang talaan ng pasyente at handa na ang opisyal na DOH ITR Slip.`;
+
     // Wire up download PDF link
     const pdfBtn = document.getElementById("downloadPdfBtn");
-    if (pdfBtn && result.pdf_url) {
-      pdfBtn.href = result.pdf_url;
-      pdfBtn.setAttribute("download", `DOH_ITR_${result.visit_id}.pdf`);
+    if (pdfBtn && pdfUrl) {
+      pdfBtn.href = pdfUrl;
+      pdfBtn.setAttribute("download", `DOH_ITR_${visitId}.pdf`);
+      pdfBtn.style.display = "inline-flex";
     }
 
     goToStep(3);
   } catch (err) {
     // 100% Offline fallback save
     const visitId = `visit_offline_${Date.now()}`;
-    const result = {
-      visit_id: visitId,
-      message: "Nakatala sa lokal na offline storage.",
-      pdf_url: null
-    };
 
+    // 1. Update or create patient in local offline state
+    let target = activePatient;
+    if (!target && payload.patient_name) {
+      target = allPatients.find(p => p.full_name && p.full_name.toLowerCase() === payload.patient_name.toLowerCase());
+    }
+    if (!target) {
+      target = {
+        patient_id: `P-${String(allPatients.length + 1).padStart(3, "0")}`,
+        full_name: payload.patient_name,
+        purok: payload.purok,
+        age: ext.age || null,
+        sex: ext.sex || "Female",
+        program: payload.program,
+        longitudinal_summary: `${payload.program} tracking for ${payload.patient_name}. Latest BP: ${(ext.vitals && ext.vitals.blood_pressure) || 'N/A'}.`,
+        encounters: []
+      };
+      allPatients.unshift(target);
+    }
+
+    if (!target.encounters) target.encounters = [];
+    target.encounters.push({
+      visit_num: target.encounters.length + 1,
+      date: new Date().toISOString().split("T")[0],
+      bp: (ext.vitals && ext.vitals.blood_pressure) || "N/A",
+      visit_id: visitId,
+      notes: ext.clinical_summary || "Offline encounter recorded."
+    });
+    activePatient = target;
+    localStorage.setItem("offlinedoc_patients_cache", JSON.stringify(allPatients));
+
+    // 2. Add to visits cache
     let visits = [];
     try {
       visits = JSON.parse(localStorage.getItem("offlinedoc_visits_cache") || "[]");
@@ -1221,26 +1324,28 @@ async function commitEncounter() {
     });
     localStorage.setItem("offlinedoc_visits_cache", JSON.stringify(visits));
 
-    if (activePatient) {
-      if (!activePatient.encounters) activePatient.encounters = [];
-      activePatient.encounters.push({
-        visit_num: activePatient.encounters.length + 1,
-        date: new Date().toISOString().split("T")[0],
-        bp: (ext.vitals && ext.vitals.blood_pressure) || "N/A",
-        visit_id: visitId,
-        notes: ext.clinical_summary || "Offline encounter recorded."
-      });
-      localStorage.setItem("offlinedoc_patients_cache", JSON.stringify(allPatients));
+    // 3. Immediately re-render UI
+    renderPatients(allPatients);
+    if (typeof renderSlips === "function") renderSlips(visits);
+    const countAllEl = document.getElementById("countAll");
+    if (countAllEl) countAllEl.innerText = allPatients.length;
+    const countTodayEl = document.getElementById("countToday");
+    if (countTodayEl) {
+      countTodayEl.innerText = allPatients.reduce((sum, p) => sum + (p.encounters ? p.encounters.length : 0), 0);
     }
 
-    document.getElementById("successMsg").innerText = `Encounter committed to local offline storage (Ref: ${visitId}).`;
+    // 4. Simple friendly offline message
+    document.getElementById("successMsg").innerText = `Matagumpay na naitala ang rekord ni ${target.full_name} sa lokal na memorya habang offline. Na-update na ang talaan ng pasyente.`;
+    const pdfBtn = document.getElementById("downloadPdfBtn");
+    if (pdfBtn) pdfBtn.style.display = "none";
+
     goToStep(3);
   } finally {
     btn.innerHTML = `
       <svg class="btn-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
-      <span>Confirm & Commit to Ledger</span>`;
+      <span>I-save ang Rekord</span>`;
     btn.disabled = false;
   }
 }

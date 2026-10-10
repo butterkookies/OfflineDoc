@@ -354,7 +354,9 @@ def seed_initial_patients():
             except Exception as e:
                 print(f"[OfflineDoc] Seed PDF warning for {v['visit_id']}: {e}")
 
-# seed_initial_patients() - Disabled by default to remove fake data and allow pure real encounters
+# Ensure default authentic cohorts exist on disk for seamless synchronization
+if len(list(PATIENTS_DIR.glob("*.json"))) < 4:
+    seed_initial_patients()
 
 class ExtractRequest(BaseModel):
     transcript: str
@@ -964,9 +966,12 @@ def save_visit(visit: VisitRecord):
     return {
         "success": True,
         "visit_id": visit_id,
+        "patient_id": real_pid,
+        "patient": p_data,
+        "visit": v_data,
         "pdf_url": f"/api/export-pdf/{visit_id}",
         "total_encounters": len(encounters),
-        "message": "Encounter committed to local JSON ledger and DOH ITR PDF generated."
+        "message": "Matagumpay na naitala ang rekord ng pasyente."
     }
 
 @app.get("/api/export-pdf/{visit_id}")
